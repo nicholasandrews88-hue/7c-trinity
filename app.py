@@ -699,6 +699,9 @@ right_html = (
     f"</div>"
 )
 
+
+# ---------------- SELECTED SUMMARY ----------------
+
 left_col, center_col, right_col = st.columns([1.05, 2.8, 1.05])
 
 with left_col:
@@ -712,3 +715,27 @@ with center_col:
 
 with right_col:
     st.markdown(right_html, unsafe_allow_html=True)
+
+# ---------------- ALL WATCHLIST TABLES ----------------
+
+st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
+all_cols = st.columns(len(watchlist))
+
+for index, symbol in enumerate(watchlist):
+    symbol_rows, symbol_price, symbol_change, symbol_debug = ribbon_data[symbol]
+
+    with all_cols[index]:
+        st.markdown(
+            f"<div class='summary-card' style='margin-bottom:7px'>"
+            f"<div class='ticker-symbol'>{html.escape(symbol)}</div>"
+            f"<div class='ticker-price'>${html.escape(str(symbol_price))} "
+            f"{html.escape(str(symbol_change))}</div>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
+        if symbol_rows:
+            render_gex_table(symbol_rows)
+        else:
+            st.caption("No data")
