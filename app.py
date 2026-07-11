@@ -548,6 +548,175 @@ hr {
 .zone-support { color:var(--green); }
 .zone-resistance { color:var(--red); }
 
+
+.status-bar {
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:7px;
+    margin:8px 0 10px;
+}
+
+.status-item {
+    background:rgba(10,14,19,.92);
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:7px 9px;
+    text-align:center;
+}
+
+.status-label {
+    color:var(--muted);
+    font-size:8px;
+    font-weight:850;
+    letter-spacing:.08em;
+}
+
+.status-value {
+    margin-top:2px;
+    font-size:11px;
+    font-weight:950;
+}
+
+.live-pulse {
+    display:inline-block;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 0 0 rgba(115,246,167,.7);
+    animation:pulseLive 1.8s infinite;
+    margin-right:5px;
+}
+
+@keyframes pulseLive {
+    0% { box-shadow:0 0 0 0 rgba(115,246,167,.55); }
+    70% { box-shadow:0 0 0 8px rgba(115,246,167,0); }
+    100% { box-shadow:0 0 0 0 rgba(115,246,167,0); }
+}
+
+.gex-magnet td {
+    animation:magnetGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes magnetGlow {
+    0%,100% { filter:brightness(1); }
+    50% { filter:brightness(1.14); }
+}
+
+.ticker-meta {
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-top:4px;
+}
+
+.badge {
+    display:inline-flex;
+    align-items:center;
+    padding:3px 6px;
+    border-radius:999px;
+    font-size:8px;
+    font-weight:900;
+    border:1px solid var(--line);
+    background:#0a0e13;
+}
+
+.badge-green {
+    color:var(--green);
+    border-color:rgba(115,246,167,.22);
+    background:rgba(24,92,49,.20);
+}
+
+.badge-red {
+    color:var(--red);
+    border-color:rgba(255,102,115,.22);
+    background:rgba(110,25,33,.20);
+}
+
+.badge-yellow {
+    color:var(--yellow);
+    border-color:rgba(245,221,79,.22);
+    background:rgba(101,87,14,.20);
+}
+
+.execution-panel {
+    margin-top:8px;
+    background:linear-gradient(180deg, rgba(14,19,26,.98), rgba(8,12,17,.98));
+    border:1px solid rgba(115,246,167,.15);
+    border-radius:13px;
+    padding:10px;
+    box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+
+.execution-title {
+    font-size:9px;
+    font-weight:950;
+    letter-spacing:.1em;
+    color:#fff;
+    margin-bottom:7px;
+}
+
+.execution-grid {
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:7px;
+}
+
+.execution-item {
+    background:#090d12;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 7px;
+    text-align:center;
+}
+
+.execution-label {
+    color:var(--muted);
+    font-size:8px;
+    font-weight:850;
+    letter-spacing:.07em;
+}
+
+.execution-value {
+    margin-top:3px;
+    font-size:11px;
+    font-weight:950;
+}
+
+.market-read {
+    margin-top:8px;
+    background:#090d12;
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:10px;
+}
+
+.market-read-title {
+    color:#fff;
+    font-size:9px;
+    font-weight:950;
+    letter-spacing:.1em;
+    margin-bottom:6px;
+}
+
+.market-read-main {
+    font-size:12px;
+    font-weight:950;
+    margin-bottom:6px;
+}
+
+.market-read-line {
+    color:#b8c1cd;
+    font-size:10px;
+    line-height:1.5;
+    margin:2px 0;
+}
+
+@media (max-width:900px) {
+    .status-bar { grid-template-columns:repeat(2,1fr); }
+    .execution-grid { grid-template-columns:repeat(2,1fr); }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -600,6 +769,23 @@ symbols = [
 ]
 
 search_ticker = symbols[-1] if symbols else "SPY"
+
+
+st.markdown(
+    "<div class='status-bar'>"
+    "<div class='status-item'><div class='status-label'>STATUS</div>"
+    "<div class='status-value green'><span class='live-pulse'></span>LIVE</div></div>"
+    "<div class='status-item'><div class='status-label'>REFRESH</div>"
+    "<div class='status-value'>15 SEC</div></div>"
+    "<div class='status-item'><div class='status-label'>MODE</div>"
+    "<div class='status-value'>GEX + FLOW</div></div>"
+    "<div class='status-item'><div class='status-label'>WATCHLIST</div>"
+    f"<div class='status-value'>{len(symbols)} NAMES</div></div>"
+    "<div class='status-item'><div class='status-label'>SELECTED</div>"
+    f"<div class='status-value yellow'>{search_ticker}</div></div>"
+    "</div>",
+    unsafe_allow_html=True
+)
 
 # ---------------- API FUNCTIONS ----------------
 
@@ -774,15 +960,33 @@ except Exception as e:
 # ---------------- PANEL ----------------
 
 def panel(symbol, price, change, rows):
-    st.markdown(f"<div class='panel-title'>{html.escape(str(symbol))}</div>", unsafe_allow_html=True)
-
     is_live = str(change) == "LIVE"
     price_class = "price-green" if is_live else "price-red"
-    status_label = "● LIVE" if is_live else "● SNAPSHOT"
+    status_badge = "badge-green" if is_live else "badge-yellow"
+    status_text = "LIVE" if is_live else "SNAPSHOT"
+
+    try:
+        local_paths = build_paths(rows, price)
+        local_regime = "MIXED"
+        if local_paths:
+            _, _, _, _, local_neg, local_pos = local_paths
+            local_regime = "LONG GAMMA" if abs(local_pos[1]) >= abs(local_neg[1]) else "SHORT GAMMA"
+    except Exception:
+        local_regime = "MIXED"
+
+    regime_badge = (
+        "badge-green" if local_regime == "LONG GAMMA"
+        else "badge-red" if local_regime == "SHORT GAMMA"
+        else "badge-yellow"
+    )
+
     st.markdown(
-        f"<div class='{price_class}'>${html.escape(str(price))} {html.escape(str(change))}</div>"
-        f"<div class='live' style='margin-top:2px'>{status_label} &nbsp; "
-        "<span style='color:#8d95a3;font-weight:600'>GEX Map</span></div>",
+        f"<div class='panel-title'>{html.escape(str(symbol))}</div>"
+        f"<div class='{price_class}'>${html.escape(str(price))}</div>"
+        f"<div class='ticker-meta'>"
+        f"<span class='badge {status_badge}'>{status_text}</span>"
+        f"<span class='badge {regime_badge}'>{local_regime}</span>"
+        f"</div>",
         unsafe_allow_html=True
     )
 
@@ -965,6 +1169,7 @@ downside_text = " → ".join([str(x) for x in downside_targets]) if downside_tar
 
 
 
+
 # ---------------- COMPACT SUMMARY PANEL ----------------
 
 flow_short = (
@@ -1108,59 +1313,58 @@ resistance_zone = upside_targets[0] if upside_targets else primary_magnet
 
 bull_entry = upside_targets[0] if upside_targets else primary_magnet
 bear_entry = downside_targets[0] if downside_targets else danger_level
-bull_target = upside_targets[-1] if upside_targets else primary_magnet
-bear_target = downside_targets[-1] if downside_targets else danger_level
+bull_target_1 = upside_targets[0] if upside_targets else primary_magnet
+bull_target_2 = upside_targets[-1] if upside_targets else primary_magnet
+bear_target_1 = downside_targets[0] if downside_targets else danger_level
+bear_target_2 = downside_targets[-1] if downside_targets else danger_level
 
 if flow_short == "CALLS" and score >= 65:
-    best_side = "CALLS"
-    best_detail = f"Above {bull_entry}"
+    best_side = "LONGS"
     entry_level = bull_entry
+    confirmation_level = bull_target_1
     invalidation_level = bear_entry
-    invalidation_detail = f"Below {bear_entry}"
-    target_level = bull_target
+    target_1 = bull_target_1
+    target_2 = bull_target_2
     trade_class = "green"
-    edge_text = f"Favor calls above {bull_entry}. Avoid longs below {bear_entry}."
+    edge_text = f"Buyers control above {bull_entry}. Avoid longs below {bear_entry}."
+    read_main = f"BUYERS CONTROL ABOVE {bull_entry}"
 elif flow_short == "PUTS" and score >= 65:
-    best_side = "PUTS"
-    best_detail = f"Below {bear_entry}"
+    best_side = "SHORTS"
     entry_level = bear_entry
+    confirmation_level = bear_target_1
     invalidation_level = bull_entry
-    invalidation_detail = f"Above {bull_entry}"
-    target_level = bear_target
+    target_1 = bear_target_1
+    target_2 = bear_target_2
     trade_class = "red"
-    edge_text = f"Favor puts below {bear_entry}. Avoid shorts above {bull_entry}."
+    edge_text = f"Sellers control below {bear_entry}. Avoid shorts above {bull_entry}."
+    read_main = f"SELLERS CONTROL BELOW {bear_entry}"
 else:
     best_side = "WAIT"
-    best_detail = f"Need {bear_entry} / {bull_entry}"
     entry_level = f"{bear_entry} / {bull_entry}"
-    invalidation_level = bull_entry
-    invalidation_detail = f"Confirm outside range"
-    target_level = "CONFIRM"
+    confirmation_level = "BREAK RANGE"
+    invalidation_level = "N/A"
+    target_1 = "CONFIRM"
+    target_2 = "CONFIRM"
     trade_class = "yellow"
     edge_text = f"Wait for a break outside {bear_entry}–{bull_entry}."
-
-ai_lines = []
-
-if flow_short == "CALLS":
-    ai_lines.append("• Buyers currently have the cleaner edge.")
-elif flow_short == "PUTS":
-    ai_lines.append("• Sellers currently control the cleaner side of the tape.")
-else:
-    ai_lines.append("• Neither side has clean control; confirmation matters most.")
+    read_main = f"NO CLEAN EDGE INSIDE {bear_entry}–{bull_entry}"
 
 if gamma_regime == "STABLE":
-    ai_lines.append("• Dealers are long gamma, which favors rotation and mean reversion.")
+    read_line_1 = "Dealer positioning favors rotation and mean reversion."
 elif gamma_regime == "EXPANSIVE":
-    ai_lines.append("• Dealers are short gamma, which can amplify momentum and volatility.")
+    read_line_1 = "Dealer positioning can amplify momentum and volatility."
 else:
-    ai_lines.append("• Dealer positioning is mixed, so two-way trade remains possible.")
+    read_line_1 = "Dealer positioning is mixed and two-way trade remains possible."
 
-ai_lines.append(f"• {resistance_zone} is the first resistance zone and {support_zone} is the first support zone.")
-ai_lines.append(f"• {primary_magnet} remains the primary magnet; {danger_level} is the key accelerator.")
-ai_lines.append(f"• Above {bull_entry} opens the upside path toward {upside_text}.")
-ai_lines.append(f"• Below {bear_entry} opens the downside path toward {downside_text}.")
+if flow_short == "CALLS":
+    read_line_2 = f"Call flow supports continuation while price holds above {bull_entry}."
+elif flow_short == "PUTS":
+    read_line_2 = f"Put flow supports continuation while price remains below {bear_entry}."
+else:
+    read_line_2 = "Flow is mixed, so confirmation matters more than anticipation."
 
-ai_html = "".join(f"<div class='ai-line'>{line}</div>" for line in ai_lines)
+read_line_3 = f"Primary magnet: {primary_magnet}. Key accelerator: {danger_level}."
+read_line_4 = f"Upside path: {upside_text}. Downside path: {downside_text}."
 
 summary_html = (
     f"<div class='summary-panel'>"
@@ -1208,23 +1412,30 @@ summary_html = (
     f"<div class='detail-value zone-resistance'>{resistance_zone}</div></div>"
     f"</div>"
 
-    f"<div class='ai-read'>"
-    f"<div class='ai-read-title'>7C TRADE READ</div>"
-    f"{ai_html}"
+    f"<div class='market-read'>"
+    f"<div class='market-read-title'>7C MARKET READ</div>"
+    f"<div class='market-read-main {flow_class}'>{read_main}</div>"
+    f"<div class='market-read-line'>• {read_line_1}</div>"
+    f"<div class='market-read-line'>• {read_line_2}</div>"
+    f"<div class='market-read-line'>• {read_line_3}</div>"
+    f"<div class='market-read-line'>• {read_line_4}</div>"
     f"</div>"
 
-    f"<div class='trade-card'>"
-    f"<div class='trade-grid'>"
-    f"<div class='trade-item'><div class='trade-label'>BEST</div>"
-    f"<div class='trade-value {trade_class}'>{best_side}</div>"
-    f"<div class='subtext'>{best_detail}</div></div>"
-    f"<div class='trade-item'><div class='trade-label'>ENTRY</div>"
-    f"<div class='trade-value'>{entry_level}</div></div>"
-    f"<div class='trade-item'><div class='trade-label'>INVALID</div>"
-    f"<div class='trade-value'>{invalidation_level}</div>"
-    f"<div class='subtext'>{invalidation_detail}</div></div>"
-    f"<div class='trade-item'><div class='trade-label'>TARGET</div>"
-    f"<div class='trade-value'>{target_level}</div></div>"
+    f"<div class='execution-panel'>"
+    f"<div class='execution-title'>7C EXECUTION</div>"
+    f"<div class='execution-grid'>"
+    f"<div class='execution-item'><div class='execution-label'>SIDE</div>"
+    f"<div class='execution-value {trade_class}'>{best_side}</div></div>"
+    f"<div class='execution-item'><div class='execution-label'>ENTRY</div>"
+    f"<div class='execution-value'>{entry_level}</div></div>"
+    f"<div class='execution-item'><div class='execution-label'>CONFIRM</div>"
+    f"<div class='execution-value'>{confirmation_level}</div></div>"
+    f"<div class='execution-item'><div class='execution-label'>INVALID</div>"
+    f"<div class='execution-value'>{invalidation_level}</div></div>"
+    f"<div class='execution-item'><div class='execution-label'>TARGET 1</div>"
+    f"<div class='execution-value'>{target_1}</div></div>"
+    f"<div class='execution-item'><div class='execution-label'>TARGET 2</div>"
+    f"<div class='execution-value'>{target_2}</div></div>"
     f"</div>"
     f"</div>"
     f"</div>"
