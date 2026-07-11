@@ -358,7 +358,8 @@ def get_real_gex(symbol):
             else:
                 formatted = f"-${value:.0f}"
 
-        rows.append((int(strike), formatted))
+        display_strike = int(strike) if float(strike).is_integer() else round(float(strike), 2)
+        rows.append((display_strike, formatted))
 
     return rows, round(stock_price, 2), "LIVE", data
 
@@ -656,39 +657,29 @@ else:
     upside = []
     downside = []
 
-left_html = f"""
-<div class='summary-card'>
-    <div class='symbol-big'>{html.escape(selected_symbol)}</div>
-    <div class='price-big'>${html.escape(str(price))}</div>
-    <div class='status-small'>● {html.escape(str(change))}</div>
-
-    <div class='mini-grid'>
-        <div class='mini'>
-            <div class='mini-value {bias_class}'>{bias_icon}</div>
-            <div class='mini-label'>{html.escape(bias)}</div>
-        </div>
-        <div class='mini'>
-            <div class='mini-value'>{grade}</div>
-            <div class='mini-label'>GRADE</div>
-        </div>
-        <div class='mini'>
-            <div class='mini-value'>{score}%</div>
-            <div class='mini-label'>CONF</div>
-        </div>
-        <div class='mini'>
-            <div class='mini-value yellow'>★</div>
-            <div class='mini-label'>{magnet}</div>
-        </div>
-    </div>
-
-    <div class='level-stack'>
-        <div class='level green'>▲ {bull_trigger}</div>
-        <div class='level red'>▼ {bear_trigger}</div>
-        <div class='level yellow'>★ {magnet}</div>
-        <div class='level purple'>⚡ {accelerator}</div>
-    </div>
-</div>
-"""
+left_html = (
+    f"<div class='summary-card'>"
+    f"<div class='symbol-big'>{html.escape(selected_symbol)}</div>"
+    f"<div class='price-big'>${html.escape(str(price))}</div>"
+    f"<div class='status-small'>● {html.escape(str(change))}</div>"
+    f"<div class='mini-grid'>"
+    f"<div class='mini'><div class='mini-value {bias_class}'>{bias_icon}</div>"
+    f"<div class='mini-label'>{html.escape(bias)}</div></div>"
+    f"<div class='mini'><div class='mini-value'>{grade}</div>"
+    f"<div class='mini-label'>GRADE</div></div>"
+    f"<div class='mini'><div class='mini-value'>{score}%</div>"
+    f"<div class='mini-label'>CONF</div></div>"
+    f"<div class='mini'><div class='mini-value yellow'>★</div>"
+    f"<div class='mini-label'>{magnet}</div></div>"
+    f"</div>"
+    f"<div class='level-stack'>"
+    f"<div class='level green'>▲ {bull_trigger}</div>"
+    f"<div class='level red'>▼ {bear_trigger}</div>"
+    f"<div class='level yellow'>★ {magnet}</div>"
+    f"<div class='level purple'>⚡ {accelerator}</div>"
+    f"</div>"
+    f"</div>"
+)
 
 right_up = "".join(
     f"<div class='level green'>▲ {level}</div>"
@@ -700,13 +691,13 @@ right_down = "".join(
     for level in downside
 ) or "<div class='level'>—</div>"
 
-right_html = f"""
-<div class='summary-card'>
-    <div class='level-stack'>{right_up}</div>
-    <div style='height:12px'></div>
-    <div class='level-stack'>{right_down}</div>
-</div>
-"""
+right_html = (
+    f"<div class='summary-card'>"
+    f"<div class='level-stack'>{right_up}</div>"
+    f"<div style='height:12px'></div>"
+    f"<div class='level-stack'>{right_down}</div>"
+    f"</div>"
+)
 
 left_col, center_col, right_col = st.columns([1.05, 2.8, 1.05])
 
