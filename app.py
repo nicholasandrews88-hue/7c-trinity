@@ -312,8 +312,11 @@ def panel(symbol, price, change, rows):
     price_class = "price-green" if str(change) == "LIVE" else "price-red"
     st.markdown(f"<div class='{price_class}'>${price} {change}</div>", unsafe_allow_html=True)
 
+    status_label = "● LIVE" if str(change) == "LIVE" else "● SNAPSHOT"
+    status_class = "live" if str(change) == "LIVE" else "price-red"
     st.markdown(
-        "<span class='live'>● LIVE</span> &nbsp; <span style='color:#aaa'>GEX Map</span>",
+        f"<span class='{status_class}'>{status_label}</span> &nbsp; "
+        "<span style='color:#aaa'>GEX Map</span>",
         unsafe_allow_html=True
     )
 
@@ -323,64 +326,59 @@ def panel(symbol, price, change, rows):
         val = str(row["GEX"])
         num = clean_gex_value(val)
 
-        # Magnet always win yellow exactly as is
         if "*" in val or "★" in val:
             return ["background-color:#ffeb3b;color:black;font-weight:bold"] * len(row)
 
         abs_num = abs(num)
 
-        # strongest negative gamma = brighter purple
         if num < 0:
             if abs_num >= 100_000_000:
                 return ["background-color:#a000ff;color:white;font-weight:bold"] * len(row)
             elif abs_num >= 50_000_000:
                 return ["background-color:#5b0078;color:white;font-weight:bold"] * len(row)
-            else:
-                return ["background-color:#2a0038;color:#cfcfcf;font-weight:bold"] * len(row)
+            return ["background-color:#2a0038;color:#cfcfcf;font-weight:bold"] * len(row)
 
-        # strongest positive gamma = brighter green
         if num > 0:
             if abs_num >= 10_000_000:
                 return ["background-color:#1f8f3a;color:white;font-weight:bold"] * len(row)
             elif abs_num >= 5_000_000:
                 return ["background-color:#145f28;color:white;font-weight:bold"] * len(row)
-            else:
-                return ["background-color:#0b2f18;color:#b8b8b8;font-weight:bold"] * len(row)
+            return ["background-color:#0b2f18;color:#b8b8b8;font-weight:bold"] * len(row)
 
         return ["background-color:#111;color:#aaa"] * len(row)
 
-styled_df = df.style.apply(row_style, axis=1)
+    styled_df = df.style.apply(row_style, axis=1)
 
-st.dataframe(
-    styled_df,
-    width="stretch",
-    hide_index=True,
-    height=680
-)
+    st.dataframe(
+        styled_df,
+        width="stretch",
+        hide_index=True,
+        height=680
+    )
 
-paths = build_paths(rows, price)
+    paths = build_paths(rows, price)
 
-if paths:
-    bull_trigger, bear_trigger, upside, downside, largest_negative, largest_positive = paths
+    if paths:
+        bull_trigger, bear_trigger, upside, downside, largest_negative, largest_positive = paths
 
-    st.markdown("### 🎯 Most Likely Paths")
+        st.markdown("### 🎯 Most Likely Paths")
 
-    col1, col2 = st.columns(2)
+        col1, col2 = st.columns(2)
 
-    with col1:
-        st.markdown("#### 🟢 Bullish Path")
-        st.write(f"**Trigger:** Reclaim / hold {bull_trigger}")
-        st.write("**Targets:** " + " → ".join([str(x) for x in upside]))
+        with col1:
+            st.markdown("#### 🟢 Bullish Path")
+            st.write(f"**Trigger:** Reclaim / hold {bull_trigger}")
+            st.write("**Targets:** " + " → ".join([str(x) for x in upside]))
 
-    with col2:
-        st.markdown("#### 🔴 Bearish Path")
-        st.write(f"**Trigger:** Lose {bear_trigger}")
-        st.write("**Targets:** " + " → ".join([str(x) for x in downside]))
+        with col2:
+            st.markdown("#### 🔴 Bearish Path")
+            st.write(f"**Trigger:** Lose {bear_trigger}")
+            st.write("**Targets:** " + " → ".join([str(x) for x in downside]))
 
         st.markdown("#### ⚡ Key Levels")
         st.write(f"**Accelerator:** {largest_negative[0]} ({largest_negative[1]:,.0f})")
         st.write(f"**Stabilizer / Magnet:** {largest_positive[0]} ({largest_positive[1]:,.0f})")
-        
+
 # ---------------- GEX HELPERS ----------------
 
 def clean_gex_value(gex):
