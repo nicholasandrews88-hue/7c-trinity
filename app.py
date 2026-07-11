@@ -507,6 +507,47 @@ hr {
         flex:1;
     }
 }
+
+.edge-banner {
+    margin-top:8px;
+    background:linear-gradient(90deg, rgba(115,246,167,.08), rgba(184,76,255,.06));
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:9px 10px;
+}
+
+.edge-label {
+    color:var(--muted);
+    font-size:8px;
+    font-weight:850;
+    letter-spacing:.09em;
+}
+
+.edge-text {
+    margin-top:3px;
+    font-size:12px;
+    font-weight:950;
+    color:#f4f6f8;
+}
+
+.subtext {
+    margin-top:2px;
+    color:var(--muted);
+    font-size:8px;
+    font-weight:750;
+}
+
+.conf-level {
+    display:block;
+    margin-top:2px;
+    font-size:8px;
+    color:var(--muted);
+    font-weight:800;
+}
+
+.zone-support { color:var(--green); }
+.zone-resistance { color:var(--red); }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -521,7 +562,6 @@ st.markdown(
     "</div>",
     unsafe_allow_html=True
 )
-
 
 
 top1, top2, top3, top4 = st.columns([1, 1, 1, 2])
@@ -924,6 +964,7 @@ downside_text = " → ".join([str(x) for x in downside_targets]) if downside_tar
 
 
 
+
 # ---------------- COMPACT SUMMARY PANEL ----------------
 
 flow_short = (
@@ -964,19 +1005,26 @@ score = min(score, 92)
 
 if score >= 85:
     swing_grade = "A+"
-    day_grade = "A"
+    execution_grade = "A+"
 elif score >= 75:
     swing_grade = "A"
-    day_grade = "A"
+    execution_grade = "A"
 elif score >= 65:
     swing_grade = "B"
-    day_grade = "A"
+    execution_grade = "A"
 elif score >= 55:
     swing_grade = "C"
-    day_grade = "B"
+    execution_grade = "B"
 else:
     swing_grade = "D"
-    day_grade = "C"
+    execution_grade = "C"
+
+if score >= 75:
+    confidence_label = "HIGH"
+elif score >= 60:
+    confidence_label = "MED"
+else:
+    confidence_label = "LOW"
 
 if flow_short == "MIXED":
     risk_text = "HIGH"
@@ -1010,12 +1058,18 @@ for _, gex in selected_rows:
 if positive_total > negative_total * 1.35:
     gamma_regime = "STABLE"
     regime_class = "green"
+    dealer_bias = "LONG GAMMA"
+    environment = "CHOP"
 elif negative_total > positive_total * 1.35:
     gamma_regime = "EXPANSIVE"
     regime_class = "purple"
+    dealer_bias = "SHORT GAMMA"
+    environment = "TREND"
 else:
     gamma_regime = "MIXED"
     regime_class = "yellow"
+    dealer_bias = "BALANCED"
+    environment = "ROTATION"
 
 location_text = "N/A"
 magnet_distance = "N/A"
@@ -1049,8 +1103,8 @@ try:
 except Exception:
     pass
 
-dp_primary = primary_magnet
-dp_secondary = danger_level
+support_zone = downside_targets[0] if downside_targets else danger_level
+resistance_zone = upside_targets[0] if upside_targets else primary_magnet
 
 bull_entry = upside_targets[0] if upside_targets else primary_magnet
 bear_entry = downside_targets[0] if downside_targets else danger_level
@@ -1059,55 +1113,72 @@ bear_target = downside_targets[-1] if downside_targets else danger_level
 
 if flow_short == "CALLS" and score >= 65:
     best_side = "CALLS"
+    best_detail = f"Above {bull_entry}"
     entry_level = bull_entry
     invalidation_level = bear_entry
+    invalidation_detail = f"Below {bear_entry}"
     target_level = bull_target
     trade_class = "green"
+    edge_text = f"Favor calls above {bull_entry}. Avoid longs below {bear_entry}."
 elif flow_short == "PUTS" and score >= 65:
     best_side = "PUTS"
+    best_detail = f"Below {bear_entry}"
     entry_level = bear_entry
     invalidation_level = bull_entry
+    invalidation_detail = f"Above {bull_entry}"
     target_level = bear_target
     trade_class = "red"
+    edge_text = f"Favor puts below {bear_entry}. Avoid shorts above {bull_entry}."
 else:
     best_side = "WAIT"
+    best_detail = f"Need {bear_entry} / {bull_entry}"
     entry_level = f"{bear_entry} / {bull_entry}"
-    invalidation_level = "N/A"
+    invalidation_level = bull_entry
+    invalidation_detail = f"Confirm outside range"
     target_level = "CONFIRM"
     trade_class = "yellow"
+    edge_text = f"Wait for a break outside {bear_entry}–{bull_entry}."
 
 ai_lines = []
 
 if flow_short == "CALLS":
-    ai_lines.append(f"• Call flow is leading, giving buyers the cleaner edge.")
+    ai_lines.append("• Buyers currently have the cleaner edge.")
 elif flow_short == "PUTS":
-    ai_lines.append(f"• Put flow is leading, giving sellers the cleaner edge.")
+    ai_lines.append("• Sellers currently control the cleaner side of the tape.")
 else:
-    ai_lines.append(f"• Flow is mixed, so confirmation matters more than prediction.")
+    ai_lines.append("• Neither side has clean control; confirmation matters most.")
 
-ai_lines.append(f"• Gamma regime is {gamma_regime.lower()}, which implies "
-                f"{'slower rotation' if gamma_regime == 'STABLE' else 'faster expansion' if gamma_regime == 'EXPANSIVE' else 'two-way trade'}.")
+if gamma_regime == "STABLE":
+    ai_lines.append("• Dealers are long gamma, which favors rotation and mean reversion.")
+elif gamma_regime == "EXPANSIVE":
+    ai_lines.append("• Dealers are short gamma, which can amplify momentum and volatility.")
+else:
+    ai_lines.append("• Dealer positioning is mixed, so two-way trade remains possible.")
 
-ai_lines.append(f"• Price is {location_text.lower()}, {magnet_distance} from the magnet and "
-                f"{accelerator_distance} from the accelerator.")
-
+ai_lines.append(f"• {resistance_zone} is the first resistance zone and {support_zone} is the first support zone.")
+ai_lines.append(f"• {primary_magnet} remains the primary magnet; {danger_level} is the key accelerator.")
 ai_lines.append(f"• Above {bull_entry} opens the upside path toward {upside_text}.")
 ai_lines.append(f"• Below {bear_entry} opens the downside path toward {downside_text}.")
-ai_lines.append(f"• DP proxy zones remain {dp_primary} and {dp_secondary} until real dark-pool data is connected.")
 
 ai_html = "".join(f"<div class='ai-line'>{line}</div>" for line in ai_lines)
 
 summary_html = (
     f"<div class='summary-panel'>"
+
+    f"<div class='edge-banner'>"
+    f"<div class='edge-label'>TODAY'S EDGE</div>"
+    f"<div class='edge-text'>{edge_text}</div>"
+    f"</div>"
+
     f"<div class='summary-grid'>"
     f"<div class='summary-item'><div class='summary-label'>BIAS</div>"
     f"<div class='summary-value {flow_class}'>{bias_text}</div></div>"
     f"<div class='summary-item'><div class='summary-label'>SWING</div>"
     f"<div class='summary-value'>{swing_grade}</div></div>"
-    f"<div class='summary-item'><div class='summary-label'>DAY</div>"
-    f"<div class='summary-value'>{day_grade}</div></div>"
+    f"<div class='summary-item'><div class='summary-label'>EXECUTION</div>"
+    f"<div class='summary-value'>{execution_grade}</div></div>"
     f"<div class='summary-item'><div class='summary-label'>CONF</div>"
-    f"<div class='summary-value'>{score}%</div></div>"
+    f"<div class='summary-value'>{score}%<span class='conf-level'>{confidence_label}</span></div></div>"
     f"<div class='summary-item'><div class='summary-label'>RISK</div>"
     f"<div class='summary-value {risk_class}'>{risk_text}</div></div>"
     f"<div class='summary-item'><div class='summary-label'>FLOW</div>"
@@ -1117,6 +1188,10 @@ summary_html = (
     f"<div class='summary-details'>"
     f"<div class='detail-item'><div class='detail-label'>REGIME</div>"
     f"<div class='detail-value {regime_class}'>{gamma_regime}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>DEALERS</div>"
+    f"<div class='detail-value'>{dealer_bias}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>ENVIRONMENT</div>"
+    f"<div class='detail-value'>{environment}</div></div>"
     f"<div class='detail-item'><div class='detail-label'>LOCATION</div>"
     f"<div class='detail-value'>{location_text}</div></div>"
     f"<div class='detail-item'><div class='detail-label'>NEAREST</div>"
@@ -1127,10 +1202,10 @@ summary_html = (
     f"<div class='detail-value yellow'>{magnet_distance}</div></div>"
     f"<div class='detail-item'><div class='detail-label'>DIST ⚡</div>"
     f"<div class='detail-value purple'>{accelerator_distance}</div></div>"
-    f"<div class='detail-item'><div class='detail-label'>DP PROXY 1</div>"
-    f"<div class='detail-value purple'>{dp_primary}</div></div>"
-    f"<div class='detail-item'><div class='detail-label'>DP PROXY 2</div>"
-    f"<div class='detail-value purple'>{dp_secondary}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>SUPPORT ZONE</div>"
+    f"<div class='detail-value zone-support'>{support_zone}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>RESISTANCE ZONE</div>"
+    f"<div class='detail-value zone-resistance'>{resistance_zone}</div></div>"
     f"</div>"
 
     f"<div class='ai-read'>"
@@ -1141,11 +1216,13 @@ summary_html = (
     f"<div class='trade-card'>"
     f"<div class='trade-grid'>"
     f"<div class='trade-item'><div class='trade-label'>BEST</div>"
-    f"<div class='trade-value {trade_class}'>{best_side}</div></div>"
+    f"<div class='trade-value {trade_class}'>{best_side}</div>"
+    f"<div class='subtext'>{best_detail}</div></div>"
     f"<div class='trade-item'><div class='trade-label'>ENTRY</div>"
     f"<div class='trade-value'>{entry_level}</div></div>"
     f"<div class='trade-item'><div class='trade-label'>INVALID</div>"
-    f"<div class='trade-value'>{invalidation_level}</div></div>"
+    f"<div class='trade-value'>{invalidation_level}</div>"
+    f"<div class='subtext'>{invalidation_detail}</div></div>"
     f"<div class='trade-item'><div class='trade-label'>TARGET</div>"
     f"<div class='trade-value'>{target_level}</div></div>"
     f"</div>"
@@ -1154,5 +1231,3 @@ summary_html = (
 )
 
 st.markdown(summary_html, unsafe_allow_html=True)
-
-
