@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 import requests
 import os
 import json
@@ -44,165 +45,67 @@ headers = {
     "Content-Type": "application/json"
 }
 
-
 # ---------------- STYLE ----------------
 
 st.markdown("""
 <style>
 .stApp { background:#050607; color:#f4f6f8; }
-.block-container { padding-top:.45rem; padding-bottom:1rem; max-width:1650px; }
+.block-container { padding-top:.45rem; padding-bottom:1rem; max-width:1900px; }
 
-#MainMenu, footer, header { visibility:hidden; }
-
-.brand {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+.topbar {
     background:#0a0d12;
-    border:1px solid #202632;
+    border:1px solid #222936;
     border-radius:10px;
-    padding:7px 11px;
-    margin-bottom:8px;
-}
-
-.brand-left {
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.brand-mark {
-    color:#f1d84b;
-    font-size:15px;
-    font-weight:950;
+    padding:7px 10px;
+    margin-bottom:7px;
+    font-size:11px;
+    font-weight:900;
     letter-spacing:.04em;
 }
 
-.brand-name {
-    font-size:11px;
-    font-weight:850;
-    letter-spacing:.15em;
-}
-
-.live-dot {
-    color:#55ff99;
-    font-size:9px;
-    font-weight:900;
-    letter-spacing:.08em;
-}
-
-[data-testid="stTextInput"] label { display:none; }
-[data-testid="stTextInput"] input {
-    min-height:34px;
-    height:34px;
-    font-size:11px;
-    border-radius:8px;
+.compact-card {
     background:#0b0f15;
-}
-
-[data-testid="stButton"] button {
-    min-height:36px;
-    height:36px;
-    padding:4px 8px;
-    border-radius:8px;
-    border:1px solid #232a36;
-    background:#0b0f15;
-    color:#d7dbe2;
-    font-size:10px;
-    font-weight:850;
-}
-
-[data-testid="stButton"] button:hover {
-    border-color:#f1d84b;
-    color:#fff;
-}
-
-.ticker-strip {
-    display:flex;
-    gap:6px;
-    margin:7px 0 10px;
-    flex-wrap:wrap;
-}
-
-.summary-card {
-    border:1px solid #232a36;
-    background:#0b0f15;
+    border:1px solid #222936;
     border-radius:9px;
-    padding:8px 10px;
+    padding:7px 9px;
+    min-height:50px;
 }
 
-.symbol-big {
-    font-size:17px;
-    font-weight:950;
+.compact-label {
+    color:#7f8897;
+    font-size:8px;
+    font-weight:800;
     letter-spacing:.08em;
 }
 
-.price-big {
-    font-size:15px;
-    font-weight:900;
-    color:#55ff99;
-    margin-top:2px;
-}
-
-.status-small {
-    color:#8f98a6;
-    font-size:9px;
-    font-weight:750;
-    margin-top:3px;
-}
-
-.mini-grid {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:7px;
-    margin-top:12px;
-}
-
-.mini {
-    border:1px solid #252c38;
-    border-radius:8px;
-    background:#080b10;
-    text-align:center;
-    padding:9px 5px;
-}
-
-.mini-value {
+.compact-value {
     font-size:14px;
     font-weight:950;
-}
-
-.mini-label {
-    font-size:8px;
-    color:#7d8694;
     margin-top:2px;
 }
 
-.green { color:#55ff99; }
-.red { color:#ff6673; }
-.yellow { color:#f1d84b; }
-.purple { color:#d16cff; }
+.panel-title { font-size:16px; line-height:1.1; font-weight:950; margin-bottom:2px; }
+.price-red { color:#ff6673; font-size:13px; font-weight:900; }
+.price-green { color:#55ff99; font-size:13px; font-weight:900; }
+.live { color:#55ff99; font-size:9px; font-weight:900; }
 
-.level-stack {
-    display:flex;
-    flex-direction:column;
-    gap:7px;
-    margin-top:10px;
-}
-
-.level {
-    border:1px solid #252c38;
-    background:#080b10;
+[data-testid="stTextInput"] label { font-size:9px; }
+[data-testid="stTextInput"] input {
+    font-size:11px;
+    min-height:34px;
+    height:34px;
     border-radius:8px;
-    text-align:center;
-    padding:8px 5px;
-    font-size:12px;
-    font-weight:900;
+    background:#0b0f15;
 }
+
+[data-testid="column"] { gap:.35rem; }
+hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
 
 .gex-wrap {
     border:1px solid #232938;
-    border-radius:10px;
+    border-radius:9px;
     overflow:hidden;
+    margin-top:6px;
     background:#0a0d12;
     max-height:650px;
     overflow-y:auto;
@@ -212,39 +115,96 @@ st.markdown("""
     width:100%;
     border-collapse:collapse;
     table-layout:fixed;
-    font-size:10px;
+    font-size:9px;
 }
 
 .gex-table th {
     position:sticky;
     top:0;
     z-index:1;
-    background:#161b23;
+    background:#171b24;
     color:#8e97a6;
     text-align:left;
-    padding:6px 8px;
+    padding:5px 7px;
     font-size:8px;
-    letter-spacing:.08em;
+    letter-spacing:.06em;
 }
 
 .gex-table td {
-    padding:4px 8px;
+    padding:3px 7px;
     border-top:1px solid rgba(255,255,255,.06);
     font-weight:800;
 }
 
 .gex-table td:first-child {
-    width:45%;
+    width:42%;
     text-align:right;
 }
 
-.gex-pos-low { background:#082014; color:#b8c1bb; }
+.gex-pos-low { background:#082014; color:#b8c0bb; }
 .gex-pos-mid { background:#0d4c24; color:#fff; }
 .gex-pos-high { background:#167f36; color:#fff; }
 .gex-neg-low { background:#211029; color:#d7ccd9; }
 .gex-neg-mid { background:#511167; color:#fff; }
 .gex-neg-high { background:#8616b0; color:#fff; }
 .gex-magnet { background:#f1d84b; color:#090909; }
+
+.path-card {
+    border:1px solid #242a36;
+    background:#0b0f15;
+    border-radius:8px;
+    padding:6px 7px;
+    margin-top:6px;
+    font-size:9px;
+    line-height:1.3;
+}
+
+.path-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+}
+
+.path-title {
+    font-size:9px;
+    font-weight:950;
+    margin-bottom:2px;
+}
+
+.path-muted { color:#7f8897; }
+
+.decision-strip {
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+    margin-top:8px;
+}
+
+.decision-item {
+    background:#0b0f15;
+    border:1px solid #222936;
+    border-radius:8px;
+    padding:7px 6px;
+    text-align:center;
+}
+
+.decision-label {
+    color:#7f8897;
+    font-size:7px;
+    font-weight:800;
+    letter-spacing:.08em;
+}
+
+.decision-value {
+    font-size:11px;
+    font-weight:950;
+    margin-top:2px;
+}
+
+.green { color:#55ff99; }
+.red { color:#ff6673; }
+.yellow { color:#f1d84b; }
+.purple { color:#d16cff; }
 
 @media (max-width:900px) {
     [data-testid="stHorizontalBlock"] { flex-wrap:wrap; }
@@ -253,10 +213,55 @@ st.markdown("""
         width:100% !important;
         flex:1 1 100% !important;
     }
+    .decision-strip { grid-template-columns:repeat(2,1fr); }
     .gex-wrap { max-height:none; }
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ---------------- TOP BAR ----------------
+
+st.markdown(
+    "<div class='topbar'>⚡ 7C TRINITY &nbsp;|&nbsp; LIVE GEX + FLOW &nbsp;|&nbsp; 15s</div>",
+    unsafe_allow_html=True
+)
+
+top1, top2, top3, top4 = st.columns([1, 1, 1, 2])
+
+with top1:
+    st.markdown(
+        "<div class='compact-card'><div class='compact-label'>MARKET</div>"
+        "<div class='compact-value green'>LIVE</div></div>",
+        unsafe_allow_html=True
+    )
+
+with top2:
+    st.markdown(
+        "<div class='compact-card'><div class='compact-label'>EDGE</div>"
+        "<div class='compact-value'>DYNAMIC</div></div>",
+        unsafe_allow_html=True
+    )
+
+with top3:
+    st.markdown(
+        "<div class='compact-card'><div class='compact-label'>SIDE</div>"
+        "<div class='compact-value yellow'>FLOW</div></div>",
+        unsafe_allow_html=True
+    )
+
+with top4:
+    ticker_input = st.text_input(
+        "TICKERS",
+        "SPX, SPY, QQQ, IREN"
+    )
+
+symbols = [
+    x.strip().upper()
+    for x in ticker_input.split(",")
+    if x.strip()
+]
+
+search_ticker = symbols[-1] if symbols else "SPY"
 
 # ---------------- API FUNCTIONS ----------------
 
@@ -358,8 +363,7 @@ def get_real_gex(symbol):
             else:
                 formatted = f"-${value:.0f}"
 
-        display_strike = int(strike) if float(strike).is_integer() else round(float(strike), 2)
-        rows.append((display_strike, formatted))
+        rows.append((int(strike), formatted))
 
     return rows, round(stock_price, 2), "LIVE", data
 
@@ -393,6 +397,113 @@ def get_rows_for_symbol(symbol):
 
     # Nothing saved yet
     return placeholder_rows(), "NO DATA", "API", debug
+
+# ---------------- LIVE FLOW ----------------
+
+flow_bias = "MIXED"
+side = "WAIT"
+swing = "NEUTRAL"
+setup = "NO CLEAN EDGE"
+risk = "MEDIUM"
+
+call_premium = 0
+put_premium = 0
+net_call = 0
+net_put = 0
+raw_flow_data = {}
+
+try:
+    raw_flow_data = get_flow(search_ticker)
+    latest_key = list(raw_flow_data["data"].keys())[-1]
+    latest = raw_flow_data["data"][latest_key]
+
+    call_premium = latest.get("midMarketCallPremium", 0)
+    put_premium = latest.get("midMarketPutPremium", 0)
+    net_call = latest.get("netCallPremium", 0)
+    net_put = latest.get("netPutPremium", 0)
+
+    if abs(net_call) > abs(net_put):
+        flow_bias = "CALL FLOW DOMINANT"
+        side, swing, setup, risk = "CALLS", "BULLISH", "DIP BUY", "MEDIUM"
+
+    elif abs(net_put) > abs(net_call):
+        flow_bias = "PUT FLOW DOMINANT"
+        side, swing, setup, risk = "PUTS", "BEARISH", "POP FADE", "HIGH"
+
+except Exception as e:
+    raw_flow_data = {"error": str(e), "raw": raw_flow_data}
+
+# ---------------- PANEL ----------------
+
+def panel(symbol, price, change, rows):
+    st.markdown(f"<div class='panel-title'>{html.escape(str(symbol))}</div>", unsafe_allow_html=True)
+
+    is_live = str(change) == "LIVE"
+    price_class = "price-green" if is_live else "price-red"
+    status_label = "● LIVE" if is_live else "● SNAPSHOT"
+    st.markdown(
+        f"<div class='{price_class}'>${html.escape(str(price))} {html.escape(str(change))}</div>"
+        f"<div class='live' style='margin-top:2px'>{status_label} &nbsp; "
+        "<span style='color:#8d95a3;font-weight:600'>GEX Map</span></div>",
+        unsafe_allow_html=True
+    )
+
+    def row_class(gex_text):
+        val = str(gex_text)
+        num = clean_gex_value(val)
+        if "*" in val or "★" in val:
+            return "gex-magnet"
+        magnitude = abs(num)
+        if num < 0:
+            if magnitude >= 100_000_000:
+                return "gex-neg-high"
+            if magnitude >= 50_000_000:
+                return "gex-neg-mid"
+            return "gex-neg-low"
+        if num > 0:
+            if magnitude >= 10_000_000:
+                return "gex-pos-high"
+            if magnitude >= 5_000_000:
+                return "gex-pos-mid"
+            return "gex-pos-low"
+        return "gex-pos-low"
+
+    table_rows = []
+    for strike, gex in rows:
+        css_class = row_class(gex)
+        table_rows.append(
+            f"<tr class='{css_class}'><td>{html.escape(str(strike))}</td>"
+            f"<td>{html.escape(str(gex))}</td></tr>"
+        )
+
+    table_html = (
+        "<div class='gex-wrap'><table class='gex-table'>"
+        "<thead><tr><th>Strike</th><th>GEX</th></tr></thead>"
+        f"<tbody>{''.join(table_rows)}</tbody></table></div>"
+    )
+    st.markdown(table_html, unsafe_allow_html=True)
+
+    paths = build_paths(rows, price)
+    if paths:
+        bull_trigger, bear_trigger, upside, downside, largest_negative, largest_positive = paths
+        upside_text = " → ".join(str(x) for x in upside) or "N/A"
+        downside_text = " → ".join(str(x) for x in downside) or "N/A"
+        path_html = f"""
+        <div class='path-card'>
+          <div class='path-grid'>
+            <div><div class='path-title' style='color:#55ff99'>▲</div>
+              <div><span class='path-muted'>H</span> {bull_trigger}</div>
+              <div><span class='path-muted'>T</span> {upside_text}</div>
+            </div>
+            <div><div class='path-title' style='color:#ff6673'>▼</div>
+              <div><span class='path-muted'>L</span> {bear_trigger}</div>
+              <div><span class='path-muted'>T</span> {downside_text}</div>
+            </div>
+          </div>
+          <div style='margin-top:5px'><span class='purple'>⚡ {largest_negative[0]}</span> &nbsp; <span class='yellow'>★ {largest_positive[0]}</span></div>
+        </div>
+        """
+        st.markdown(path_html, unsafe_allow_html=True)
 
 # ---------------- GEX HELPERS ----------------
 
@@ -471,271 +582,82 @@ def build_paths(rows, stock_price):
 
 
 
+# ---------------- TABLES ON TOP ----------------
 
-# ---------------- V2 HELPERS ----------------
+st.markdown("---")
 
-def get_flow_bias(symbol):
-    try:
-        raw = get_flow(symbol)
-        if "data" not in raw or not raw["data"]:
-            return "MIXED"
+cols = st.columns(len(symbols))
 
-        latest_key = list(raw["data"].keys())[-1]
-        latest = raw["data"][latest_key]
+selected_rows = None
+selected_debug = {}
+selected_price = 0
 
-        net_call = latest.get("netCallPremium", 0) or 0
-        net_put = latest.get("netPutPremium", 0) or 0
-
-        if abs(net_call) > abs(net_put):
-            return "CALLS"
-        if abs(net_put) > abs(net_call):
-            return "PUTS"
-    except Exception:
-        pass
-
-    return "MIXED"
-
-
-def calc_score(price, paths, bias):
-    score = 50
-
-    if not paths or price in (None, "NO DATA"):
-        return score
-
-    bull_trigger, bear_trigger, upside, downside, largest_negative, largest_positive = paths
-    price = float(price)
-    magnet = float(largest_positive[0])
-    accelerator = float(largest_negative[0])
-
-    if bias == "CALLS" and price >= magnet:
-        score += 25
-    elif bias == "PUTS" and price <= accelerator:
-        score += 25
-    elif bias in ("CALLS", "PUTS"):
-        score += 12
-
-    if abs(price - magnet) <= max(1, abs(price) * .003):
-        score += 8
-
-    return min(score, 92)
-
-
-def score_grade(score):
-    if score >= 85:
-        return "A+"
-    if score >= 75:
-        return "A"
-    if score >= 65:
-        return "B"
-    if score >= 55:
-        return "C"
-    return "D"
-
-
-def gex_class(gex_text):
-    value = clean_gex_value(gex_text)
-    text = str(gex_text)
-
-    if "★" in text:
-        return "gex-magnet"
-
-    magnitude = abs(value)
-
-    if value < 0:
-        if magnitude >= 100_000_000:
-            return "gex-neg-high"
-        if magnitude >= 50_000_000:
-            return "gex-neg-mid"
-        return "gex-neg-low"
-
-    if magnitude >= 10_000_000:
-        return "gex-pos-high"
-    if magnitude >= 5_000_000:
-        return "gex-pos-mid"
-    return "gex-pos-low"
-
-
-def render_gex_table(rows):
-    table_rows = []
-
-    for strike, gex in rows:
-        css_class = gex_class(gex)
-        table_rows.append(
-            f"<tr class='{css_class}'>"
-            f"<td>{html.escape(str(strike))}</td>"
-            f"<td>{html.escape(str(gex))}</td>"
-            "</tr>"
-        )
-
-    st.markdown(
-        "<div class='gex-wrap'>"
-        "<table class='gex-table'>"
-        "<thead><tr><th>STRIKE</th><th>GEX</th></tr></thead>"
-        f"<tbody>{''.join(table_rows)}</tbody>"
-        "</table>"
-        "</div>",
-        unsafe_allow_html=True
-    )
-
-# ---------------- HEADER ----------------
-
-st.markdown("""
-<div class='brand'>
-    <div class='brand-left'>
-        <span class='brand-mark'>7C</span>
-        <span class='brand-name'>TRINITY</span>
-    </div>
-    <span class='live-dot'>● LIVE</span>
-</div>
-""", unsafe_allow_html=True)
-
-if "watchlist" not in st.session_state:
-    st.session_state.watchlist = ["SPX", "SPY", "QQQ", "IREN"]
-
-if "selected_symbol" not in st.session_state:
-    st.session_state.selected_symbol = st.session_state.watchlist[0]
-
-search_col, add_col = st.columns([5, 1])
-
-with search_col:
-    add_symbol = st.text_input(
-        "Ticker",
-        placeholder="Add ticker",
-        key="add_symbol"
-    ).upper().strip()
-
-with add_col:
-    if st.button("+", width="stretch") and add_symbol:
-        if add_symbol not in st.session_state.watchlist:
-            st.session_state.watchlist.append(add_symbol)
-        st.session_state.selected_symbol = add_symbol
-
-watchlist = st.session_state.watchlist
-
-ribbon_cols = st.columns(len(watchlist))
-ribbon_data = {}
-
-for i, symbol in enumerate(watchlist):
+for i, symbol in enumerate(symbols):
     rows, price, change, debug = get_rows_for_symbol(symbol)
-    ribbon_data[symbol] = (rows, price, change, debug)
 
-    with ribbon_cols[i]:
-        if st.button(
-            f"{symbol}\n{price}",
-            key=f"select_{symbol}",
-            width="stretch"
-        ):
-            st.session_state.selected_symbol = symbol
+    if symbol == search_ticker:
+        selected_rows = rows
+        selected_debug = debug
+        selected_price = price
 
-selected_symbol = st.session_state.selected_symbol
+    with cols[i]:
+        panel(symbol, price, change, rows)
 
-if selected_symbol not in ribbon_data:
-    ribbon_data[selected_symbol] = get_rows_for_symbol(selected_symbol)
+if selected_rows is None:
+    selected_rows = placeholder_rows()
+    selected_price = 100
 
-rows, price, change, debug = ribbon_data[selected_symbol]
-paths = build_paths(rows, price) if rows and price != "NO DATA" else None
-bias = get_flow_bias(selected_symbol)
-score = calc_score(price, paths, bias)
-grade = score_grade(score)
-
-if bias == "CALLS":
-    bias_icon = "▲"
-    bias_class = "green"
-elif bias == "PUTS":
-    bias_icon = "▼"
-    bias_class = "red"
-else:
-    bias_icon = "◆"
-    bias_class = "yellow"
-
-if paths:
-    bull_trigger, bear_trigger, upside, downside, largest_negative, largest_positive = paths
-    magnet = largest_positive[0]
-    accelerator = largest_negative[0]
-else:
-    bull_trigger = bear_trigger = magnet = accelerator = "—"
-    upside = []
-    downside = []
-
-left_html = (
-    f"<div class='summary-card'>"
-    f"<div class='symbol-big'>{html.escape(selected_symbol)}</div>"
-    f"<div class='price-big'>${html.escape(str(price))}</div>"
-    f"<div class='status-small'>● {html.escape(str(change))}</div>"
-    f"<div class='mini-grid'>"
-    f"<div class='mini'><div class='mini-value {bias_class}'>{bias_icon}</div>"
-    f"<div class='mini-label'>{html.escape(bias)}</div></div>"
-    f"<div class='mini'><div class='mini-value'>{grade}</div>"
-    f"<div class='mini-label'>GRADE</div></div>"
-    f"<div class='mini'><div class='mini-value'>{score}%</div>"
-    f"<div class='mini-label'>CONF</div></div>"
-    f"<div class='mini'><div class='mini-value yellow'>★</div>"
-    f"<div class='mini-label'>{magnet}</div></div>"
-    f"</div>"
-    f"<div class='level-stack'>"
-    f"<div class='level green'>▲ {bull_trigger}</div>"
-    f"<div class='level red'>▼ {bear_trigger}</div>"
-    f"<div class='level yellow'>★ {magnet}</div>"
-    f"<div class='level purple'>⚡ {accelerator}</div>"
-    f"</div>"
-    f"</div>"
+largest_positive, largest_negative, negative_below, upside_targets, downside_targets = analyze_rows(
+    selected_rows,
+    selected_price if selected_price else 100
 )
 
-right_up = "".join(
-    f"<div class='level green'>▲ {level}</div>"
-    for level in upside
-) or "<div class='level'>—</div>"
+primary_magnet = largest_positive[0] if largest_positive else "N/A"
+danger_level = largest_negative[0] if largest_negative else "N/A"
 
-right_down = "".join(
-    f"<div class='level red'>▼ {level}</div>"
-    for level in downside
-) or "<div class='level'>—</div>"
-
-right_html = (
-    f"<div class='summary-card'>"
-    f"<div class='level-stack'>{right_up}</div>"
-    f"<div style='height:12px'></div>"
-    f"<div class='level-stack'>{right_down}</div>"
-    f"</div>"
-)
+neg_list = ", ".join([str(x) for x in negative_below[:8]]) if negative_below else "None"
+upside_text = " → ".join([str(x) for x in upside_targets]) if upside_targets else "N/A"
+downside_text = " → ".join([str(x) for x in downside_targets]) if downside_targets else "N/A"
 
 
-# ---------------- SELECTED SUMMARY ----------------
 
-left_col, center_col, right_col = st.columns([1.05, 2.8, 1.05])
 
-with left_col:
-    st.markdown(left_html, unsafe_allow_html=True)
+# ---------------- COMPACT DECISION STRIP ----------------
 
-with center_col:
-    if rows:
-        render_gex_table(rows)
-    else:
-        st.warning("No live data or saved snapshot is available.")
+flow_short = "CALLS" if flow_bias == "CALL FLOW DOMINANT" else "PUTS" if flow_bias == "PUT FLOW DOMINANT" else "MIXED"
+flow_class = "green" if flow_short == "CALLS" else "red" if flow_short == "PUTS" else "yellow"
 
-with right_col:
-    st.markdown(right_html, unsafe_allow_html=True)
+decision_html = f"""
+<div class='decision-strip'>
+    <div class='decision-item'>
+        <div class='decision-label'>TICKER</div>
+        <div class='decision-value'>{search_ticker}</div>
+    </div>
+    <div class='decision-item'>
+        <div class='decision-label'>PRICE</div>
+        <div class='decision-value'>${selected_price}</div>
+    </div>
+    <div class='decision-item'>
+        <div class='decision-label'>FLOW</div>
+        <div class='decision-value {flow_class}'>{flow_short}</div>
+    </div>
+    <div class='decision-item'>
+        <div class='decision-label'>★</div>
+        <div class='decision-value yellow'>{primary_magnet}</div>
+    </div>
+    <div class='decision-item'>
+        <div class='decision-label'>⚡</div>
+        <div class='decision-value purple'>{danger_level}</div>
+    </div>
+    <div class='decision-item'>
+        <div class='decision-label'>▲</div>
+        <div class='decision-value green'>{upside_text}</div>
+    </div>
+    <div class='decision-item'>
+        <div class='decision-label'>▼</div>
+        <div class='decision-value red'>{downside_text}</div>
+    </div>
+</div>
+"""
 
-# ---------------- ALL WATCHLIST TABLES ----------------
-
-st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
-all_cols = st.columns(len(watchlist))
-
-for index, symbol in enumerate(watchlist):
-    symbol_rows, symbol_price, symbol_change, symbol_debug = ribbon_data[symbol]
-
-    with all_cols[index]:
-        st.markdown(
-            f"<div class='summary-card' style='margin-bottom:7px'>"
-            f"<div class='ticker-symbol'>{html.escape(symbol)}</div>"
-            f"<div class='ticker-price'>${html.escape(str(symbol_price))} "
-            f"{html.escape(str(symbol_change))}</div>"
-            f"</div>",
-            unsafe_allow_html=True
-        )
-
-        if symbol_rows:
-            render_gex_table(symbol_rows)
-        else:
-            st.caption("No data")
+st.markdown(decision_html, unsafe_allow_html=True)
