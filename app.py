@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import os
 import json
+import html
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
 
@@ -49,92 +50,87 @@ headers = {
 st.markdown("""
 <style>
 .stApp { background-color:#050607; color:white; }
-.block-container {
-    padding-top:0.45rem;
-    padding-bottom:1.2rem;
-    max-width:1800px;
-}
-
-/* tighter spacing */
-[data-testid="stVerticalBlock"] { gap:0.55rem; }
-[data-testid="stHorizontalBlock"] { gap:0.75rem; }
-hr { margin:0.65rem 0 0.9rem 0; }
+.block-container { padding-top:0.45rem; padding-bottom:1rem; max-width:1900px; }
 
 .topbar {
-    background:#0a0d12;
+    background:#0b0e14;
     border:1px solid #252b38;
-    border-radius:12px;
+    border-radius:14px;
     padding:8px 12px;
-    margin-bottom:6px;
+    margin-bottom:7px;
     font-weight:800;
     font-size:12px;
-    letter-spacing:0.2px;
 }
 
-.panel-title {
-    font-size:17px;
-    line-height:1.05;
-    font-weight:900;
-    margin-bottom:2px;
-}
-.price-red { color:#ff5c5c; font-size:14px; font-weight:900; }
+.panel-title { font-size:17px; line-height:1.1; font-weight:900; margin-bottom:2px; }
+.price-red { color:#ff5c68; font-size:14px; font-weight:900; }
 .price-green { color:#55ff99; font-size:14px; font-weight:900; }
-.live { color:#55ff99; font-size:12px; font-weight:900; }
+.live { color:#55ff99; font-size:11px; font-weight:900; }
 
-/* compact input */
-[data-testid="stTextInput"] label { font-size:11px; }
-[data-testid="stTextInput"] input {
-    font-size:12px;
-    min-height:38px;
-    padding:7px 10px;
+.green-box {
+    background:linear-gradient(90deg,#062b16,#06361d);
+    border:1px solid #00ff66;
+    color:#55ff99;
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:800;
 }
 
-/* smaller metrics */
+.red-box {
+    background:linear-gradient(90deg,#3a0505,#160000);
+    border:1px solid #ff4d4d;
+    color:#ff6b6b;
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:800;
+}
+
+.yellow-box {
+    background:linear-gradient(90deg,#302800,#181300);
+    border:1px solid #ffde59;
+    color:#ffde59;
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:800;
+}
+
 [data-testid="stMetricLabel"] { font-size:10px; }
 [data-testid="stMetricValue"] { font-size:19px; }
 [data-testid="stMetricDelta"] { font-size:9px; }
-[data-testid="stMetric"] { padding:0.1rem 0; }
+[data-testid="stTextInput"] label { font-size:11px; }
+[data-testid="stTextInput"] input { font-size:12px; min-height:38px; }
+[data-testid="column"] { gap:0.35rem; }
+hr { margin:0.7rem 0 !important; }
 
-/* smaller dataframe text */
-[data-testid="stDataFrame"] { font-size:11px; }
-[data-testid="stDataFrame"] [role="columnheader"] { font-size:10px; }
-[data-testid="stDataFrame"] [role="gridcell"] { font-size:11px; }
-
-/* cleaner readout cards */
-.green-box, .red-box, .yellow-box {
-    padding:9px 11px;
-    border-radius:9px;
-    font-size:11px;
-    line-height:1.55;
-    font-weight:700;
+.gex-wrap {
+    border:1px solid #232938;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:7px;
+    background:#0a0d12;
 }
-.green-box {
-    background:linear-gradient(90deg,#062713,#07331a);
-    border:1px solid #14c95c;
-    color:#69f69f;
-}
-.red-box {
-    background:linear-gradient(90deg,#310606,#180202);
-    border:1px solid #ef4f4f;
-    color:#ff7777;
-}
-.yellow-box {
-    background:linear-gradient(90deg,#2a2300,#161200);
-    border:1px solid #e4c83f;
-    color:#f3dc68;
-}
-
-h1 { font-size:1.5rem !important; }
-h2 { font-size:1.2rem !important; }
-h3 { font-size:1rem !important; }
-h4 { font-size:0.88rem !important; }
-p, li, .stMarkdown { font-size:12px; }
-
+.gex-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:10px; }
+.gex-table th { background:#171b24; color:#aeb5c2; text-align:left; padding:6px 8px; font-size:9px; letter-spacing:.03em; }
+.gex-table td { padding:4px 8px; border-top:1px solid rgba(255,255,255,.07); font-weight:750; }
+.gex-table td:first-child { width:42%; text-align:right; }
+.gex-pos-low { background:#082515; color:#b8c0bb; }
+.gex-pos-mid { background:#0d5426; color:#fff; }
+.gex-pos-high { background:#188d3a; color:#fff; }
+.gex-neg-low { background:#23102d; color:#d4c8d8; }
+.gex-neg-mid { background:#55116f; color:#fff; }
+.gex-neg-high { background:#8a14b8; color:#fff; }
+.gex-magnet { background:#f1d84b; color:#090909; }
+.path-card { border:1px solid #242a36; background:#0b0f15; border-radius:9px; padding:8px 9px; margin-top:7px; font-size:10px; line-height:1.35; }
+.path-title { font-size:10px; font-weight:900; margin-bottom:3px; }
+.path-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.path-muted { color:#98a1af; }
 @media (max-width: 900px) {
-    .block-container { padding-left:0.7rem; padding-right:0.7rem; }
-    [data-testid="stHorizontalBlock"] { flex-wrap:wrap; }
-    [data-testid="column"] { min-width:100% !important; width:100% !important; }
-    .panel-title { margin-top:8px; }
+  [data-testid="stHorizontalBlock"] { flex-wrap:wrap; }
+  [data-testid="column"] { min-width:100% !important; width:100% !important; flex:1 1 100% !important; }
+  .gex-table { font-size:11px; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -344,77 +340,75 @@ except Exception as e:
 # ---------------- PANEL ----------------
 
 def panel(symbol, price, change, rows):
-    st.markdown(f"<div class='panel-title'>{symbol}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='panel-title'>{html.escape(str(symbol))}</div>", unsafe_allow_html=True)
 
-    price_class = "price-green" if str(change) == "LIVE" else "price-red"
-    st.markdown(f"<div class='{price_class}'>${price} {change}</div>", unsafe_allow_html=True)
-
-    status_label = "● LIVE" if str(change) == "LIVE" else "● SNAPSHOT"
-    status_class = "live" if str(change) == "LIVE" else "price-red"
+    is_live = str(change) == "LIVE"
+    price_class = "price-green" if is_live else "price-red"
+    status_label = "● LIVE" if is_live else "● SNAPSHOT"
     st.markdown(
-        f"<span class='{status_class}'>{status_label}</span> &nbsp; "
-        "<span style='color:#aaa'>GEX Map</span>",
+        f"<div class='{price_class}'>${html.escape(str(price))} {html.escape(str(change))}</div>"
+        f"<div class='live' style='margin-top:2px'>{status_label} &nbsp; "
+        "<span style='color:#8d95a3;font-weight:600'>GEX Map</span></div>",
         unsafe_allow_html=True
     )
 
-    df = pd.DataFrame(rows, columns=["Strike", "GEX"])
-
-    def row_style(row):
-        val = str(row["GEX"])
+    def row_class(gex_text):
+        val = str(gex_text)
         num = clean_gex_value(val)
-
         if "*" in val or "★" in val:
-            return ["background-color:#ffeb3b;color:black;font-weight:bold"] * len(row)
-
-        abs_num = abs(num)
-
+            return "gex-magnet"
+        magnitude = abs(num)
         if num < 0:
-            if abs_num >= 100_000_000:
-                return ["background-color:#a000ff;color:white;font-weight:bold"] * len(row)
-            elif abs_num >= 50_000_000:
-                return ["background-color:#5b0078;color:white;font-weight:bold"] * len(row)
-            return ["background-color:#2a0038;color:#cfcfcf;font-weight:bold"] * len(row)
-
+            if magnitude >= 100_000_000:
+                return "gex-neg-high"
+            if magnitude >= 50_000_000:
+                return "gex-neg-mid"
+            return "gex-neg-low"
         if num > 0:
-            if abs_num >= 10_000_000:
-                return ["background-color:#1f8f3a;color:white;font-weight:bold"] * len(row)
-            elif abs_num >= 5_000_000:
-                return ["background-color:#145f28;color:white;font-weight:bold"] * len(row)
-            return ["background-color:#0b2f18;color:#b8b8b8;font-weight:bold"] * len(row)
+            if magnitude >= 10_000_000:
+                return "gex-pos-high"
+            if magnitude >= 5_000_000:
+                return "gex-pos-mid"
+            return "gex-pos-low"
+        return "gex-pos-low"
 
-        return ["background-color:#111;color:#aaa"] * len(row)
+    table_rows = []
+    for strike, gex in rows:
+        css_class = row_class(gex)
+        table_rows.append(
+            f"<tr class='{css_class}'><td>{html.escape(str(strike))}</td>"
+            f"<td>{html.escape(str(gex))}</td></tr>"
+        )
 
-    styled_df = df.style.apply(row_style, axis=1)
-
-    st.dataframe(
-        styled_df,
-        width="stretch",
-        hide_index=True,
-        height=560
+    table_html = (
+        "<div class='gex-wrap'><table class='gex-table'>"
+        "<thead><tr><th>Strike</th><th>GEX</th></tr></thead>"
+        f"<tbody>{''.join(table_rows)}</tbody></table></div>"
     )
+    st.markdown(table_html, unsafe_allow_html=True)
 
     paths = build_paths(rows, price)
-
     if paths:
         bull_trigger, bear_trigger, upside, downside, largest_negative, largest_positive = paths
-
-        st.markdown("### 🎯 Most Likely Paths")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("#### 🟢 Bullish Path")
-            st.write(f"**Trigger:** Reclaim / hold {bull_trigger}")
-            st.write("**Targets:** " + " → ".join([str(x) for x in upside]))
-
-        with col2:
-            st.markdown("#### 🔴 Bearish Path")
-            st.write(f"**Trigger:** Lose {bear_trigger}")
-            st.write("**Targets:** " + " → ".join([str(x) for x in downside]))
-
-        st.markdown("#### ⚡ Key Levels")
-        st.write(f"**Accelerator:** {largest_negative[0]} ({largest_negative[1]:,.0f})")
-        st.write(f"**Stabilizer / Magnet:** {largest_positive[0]} ({largest_positive[1]:,.0f})")
+        upside_text = " → ".join(str(x) for x in upside) or "N/A"
+        downside_text = " → ".join(str(x) for x in downside) or "N/A"
+        path_html = f"""
+        <div class='path-card'>
+          <div class='path-grid'>
+            <div><div class='path-title' style='color:#55ff99'>Bullish</div>
+              <div><span class='path-muted'>Hold:</span> {bull_trigger}</div>
+              <div><span class='path-muted'>Targets:</span> {upside_text}</div>
+            </div>
+            <div><div class='path-title' style='color:#ff6673'>Bearish</div>
+              <div><span class='path-muted'>Lose:</span> {bear_trigger}</div>
+              <div><span class='path-muted'>Targets:</span> {downside_text}</div>
+            </div>
+          </div>
+          <div style='margin-top:6px'><span class='path-muted'>Accelerator:</span> {largest_negative[0]} &nbsp; | &nbsp;
+          <span class='path-muted'>Magnet:</span> {largest_positive[0]}</div>
+        </div>
+        """
+        st.markdown(path_html, unsafe_allow_html=True)
 
 # ---------------- GEX HELPERS ----------------
 
