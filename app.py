@@ -522,19 +522,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown(
-    "<div class='toolbar'>"
-    "<span class='pill'>☰ 77</span>"
-    "<span class='pill'>▣ 3</span>"
-    "<span class='pill pill-purple'>⚡ GEX</span>"
-    "<span class='pill pill-yellow'>15m</span>"
-    "<span class='pill'>◎</span>"
-    "<span class='pill'>♛</span>"
-    "<span class='pill pill-green'>↶</span>"
-    "<span class='pill'>↻</span>"
-    "</div>",
-    unsafe_allow_html=True
-)
+
 
 top1, top2, top3, top4 = st.columns([1, 1, 1, 2])
 
@@ -1168,12 +1156,3 @@ summary_html = (
 st.markdown(summary_html, unsafe_allow_html=True)
 
 
-st.markdown(
-    "<div class='bottom-dock'>"
-    "<div class='dock-item dock-active'>▰<br>Heatmaps</div>"
-    "<div class='dock-item'>⌁<br>Read</div>"
-    "<div class='dock-item'>♢<br>Alerts</div>"
-    "<div class='dock-item'>♛<br>Trinity</div>"
-    "</div>",
-    unsafe_allow_html=True
-)
