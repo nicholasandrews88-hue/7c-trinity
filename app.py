@@ -216,6 +216,53 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
     .decision-strip { grid-template-columns:repeat(2,1fr); }
     .gex-wrap { max-height:none; }
 }
+
+.summary-panel {
+    margin-top:8px;
+    background:#0b0f15;
+    border:1px solid #222936;
+    border-radius:9px;
+    padding:8px 9px;
+}
+
+.summary-grid {
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:6px;
+}
+
+.summary-item {
+    background:#080b10;
+    border:1px solid #252c38;
+    border-radius:8px;
+    padding:7px 6px;
+    text-align:center;
+}
+
+.summary-label {
+    color:#7f8897;
+    font-size:7px;
+    font-weight:800;
+    letter-spacing:.07em;
+}
+
+.summary-value {
+    font-size:11px;
+    font-weight:950;
+    margin-top:2px;
+}
+
+.summary-note {
+    margin-top:7px;
+    color:#9aa3b1;
+    font-size:8px;
+    line-height:1.35;
+}
+
+@media (max-width:900px) {
+    .summary-grid { grid-template-columns:repeat(2,1fr); }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -491,13 +538,13 @@ def panel(symbol, price, change, rows):
         path_html = f"""
         <div class='path-card'>
           <div class='path-grid'>
-            <div><div class='path-title' style='color:#55ff99'>▲</div>
-              <div><span class='path-muted'>H</span> {bull_trigger}</div>
-              <div><span class='path-muted'>T</span> {upside_text}</div>
+            <div><div class='path-title' style='color:#55ff99'>Bullish Path</div>
+              <div><span class='path-muted'>Trigger:</span> {bull_trigger}</div>
+              <div><span class='path-muted'>Targets:</span> {upside_text}</div>
             </div>
-            <div><div class='path-title' style='color:#ff6673'>▼</div>
-              <div><span class='path-muted'>L</span> {bear_trigger}</div>
-              <div><span class='path-muted'>T</span> {downside_text}</div>
+            <div><div class='path-title' style='color:#ff6673'>Bearish Path</div>
+              <div><span class='path-muted'>Trigger:</span> {bear_trigger}</div>
+              <div><span class='path-muted'>Targets:</span> {downside_text}</div>
             </div>
           </div>
           <div style='margin-top:5px'><span class='purple'>⚡ {largest_negative[0]}</span> &nbsp; <span class='yellow'>★ {largest_positive[0]}</span></div>
@@ -622,42 +669,115 @@ downside_text = " → ".join([str(x) for x in downside_targets]) if downside_tar
 
 
 
-# ---------------- COMPACT DECISION STRIP ----------------
 
-flow_short = "CALLS" if flow_bias == "CALL FLOW DOMINANT" else "PUTS" if flow_bias == "PUT FLOW DOMINANT" else "MIXED"
-flow_class = "green" if flow_short == "CALLS" else "red" if flow_short == "PUTS" else "yellow"
+# ---------------- COMPACT SUMMARY PANEL ----------------
 
-decision_html = f"""
-<div class='decision-strip'>
-    <div class='decision-item'>
-        <div class='decision-label'>TICKER</div>
-        <div class='decision-value'>{search_ticker}</div>
+flow_short = (
+    "CALLS" if flow_bias == "CALL FLOW DOMINANT"
+    else "PUTS" if flow_bias == "PUT FLOW DOMINANT"
+    else "MIXED"
+)
+
+flow_class = (
+    "green" if flow_short == "CALLS"
+    else "red" if flow_short == "PUTS"
+    else "yellow"
+)
+
+# Simple internal ratings from flow + gamma placement.
+score = 50
+
+if selected_price not in (None, "NO DATA"):
+    try:
+        px = float(selected_price)
+        magnet_px = float(primary_magnet)
+        danger_px = float(danger_level)
+
+        if flow_short == "CALLS" and px >= magnet_px:
+            score += 25
+        elif flow_short == "PUTS" and px <= danger_px:
+            score += 25
+        elif flow_short in ("CALLS", "PUTS"):
+            score += 12
+
+        if abs(px - magnet_px) <= max(1, abs(px) * 0.003):
+            score += 8
+    except Exception:
+        pass
+
+score = min(score, 92)
+
+if score >= 85:
+    swing_grade = "A+"
+    day_grade = "A"
+elif score >= 75:
+    swing_grade = "A"
+    day_grade = "A"
+elif score >= 65:
+    swing_grade = "B"
+    day_grade = "A"
+elif score >= 55:
+    swing_grade = "C"
+    day_grade = "B"
+else:
+    swing_grade = "D"
+    day_grade = "C"
+
+if flow_short == "MIXED":
+    risk_text = "HIGH"
+    risk_class = "red"
+elif score >= 75:
+    risk_text = "LOW"
+    risk_class = "green"
+else:
+    risk_text = "MED"
+    risk_class = "yellow"
+
+bias_text = (
+    "BULLISH" if flow_short == "CALLS"
+    else "BEARISH" if flow_short == "PUTS"
+    else "NEUTRAL"
+)
+
+summary_note = (
+    f"{search_ticker} is {bias_text.lower()} with {flow_short.lower()} flow. "
+    f"Watch {primary_magnet} as the main magnet and {danger_level} as the key accelerator. "
+    f"Upside: {upside_text}. Downside: {downside_text}."
+)
+
+summary_html = f"""
+<div class='summary-panel'>
+    <div class='summary-grid'>
+        <div class='summary-item'>
+            <div class='summary-label'>BIAS</div>
+            <div class='summary-value {flow_class}'>{bias_text}</div>
+        </div>
+        <div class='summary-item'>
+            <div class='summary-label'>SWING</div>
+            <div class='summary-value'>{swing_grade}</div>
+        </div>
+        <div class='summary-item'>
+            <div class='summary-label'>DAY</div>
+            <div class='summary-value'>{day_grade}</div>
+        </div>
+        <div class='summary-item'>
+            <div class='summary-label'>CONF</div>
+            <div class='summary-value'>{score}%</div>
+        </div>
+        <div class='summary-item'>
+            <div class='summary-label'>RISK</div>
+            <div class='summary-value {risk_class}'>{risk_text}</div>
+        </div>
+        <div class='summary-item'>
+            <div class='summary-label'>FLOW</div>
+            <div class='summary-value {flow_class}'>{flow_short}</div>
+        </div>
     </div>
-    <div class='decision-item'>
-        <div class='decision-label'>PRICE</div>
-        <div class='decision-value'>${selected_price}</div>
-    </div>
-    <div class='decision-item'>
-        <div class='decision-label'>FLOW</div>
-        <div class='decision-value {flow_class}'>{flow_short}</div>
-    </div>
-    <div class='decision-item'>
-        <div class='decision-label'>★</div>
-        <div class='decision-value yellow'>{primary_magnet}</div>
-    </div>
-    <div class='decision-item'>
-        <div class='decision-label'>⚡</div>
-        <div class='decision-value purple'>{danger_level}</div>
-    </div>
-    <div class='decision-item'>
-        <div class='decision-label'>▲</div>
-        <div class='decision-value green'>{upside_text}</div>
-    </div>
-    <div class='decision-item'>
-        <div class='decision-label'>▼</div>
-        <div class='decision-value red'>{downside_text}</div>
+
+    <div class='summary-note'>
+        {summary_note}
     </div>
 </div>
 """
 
-st.markdown(decision_html, unsafe_allow_html=True)
+st.markdown(summary_html, unsafe_allow_html=True)
