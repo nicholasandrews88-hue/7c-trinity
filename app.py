@@ -263,6 +263,27 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
     .summary-grid { grid-template-columns:repeat(2,1fr); }
 }
 
+
+.summary-note {
+    margin-top:7px;
+    color:#aab2bf;
+    font-size:8px;
+    line-height:1.45;
+    background:#080b10;
+    border:1px solid #252c38;
+    border-radius:8px;
+    padding:7px 8px;
+}
+
+.summary-note b {
+    color:#f4f6f8;
+}
+
+.optimal-call { color:#55ff99; font-weight:900; }
+.optimal-put { color:#ff6673; font-weight:900; }
+.optimal-wait { color:#f1d84b; font-weight:900; }
+.dp-proxy { color:#d16cff; font-weight:900; }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -670,6 +691,7 @@ downside_text = " → ".join([str(x) for x in downside_targets]) if downside_tar
 
 
 
+
 # ---------------- COMPACT SUMMARY PANEL ----------------
 
 flow_short = (
@@ -684,7 +706,6 @@ flow_class = (
     else "yellow"
 )
 
-# Simple internal ratings from flow + gamma placement.
 score = 50
 
 if selected_price not in (None, "NO DATA"):
@@ -739,45 +760,62 @@ bias_text = (
     else "NEUTRAL"
 )
 
-summary_note = (
-    f"{search_ticker} is {bias_text.lower()} with {flow_short.lower()} flow. "
-    f"Watch {primary_magnet} as the main magnet and {danger_level} as the key accelerator. "
-    f"Upside: {upside_text}. Downside: {downside_text}."
+# Until a real dark-pool endpoint is connected, use the strongest dealer levels
+# as clearly labeled dark-pool proxies rather than pretending they are real prints.
+dp_primary = primary_magnet
+dp_secondary = danger_level
+
+if flow_short == "CALLS" and score >= 65:
+    optimal_text = f"CALLS ABOVE {upside_targets[0] if upside_targets else primary_magnet}"
+    optimal_class = "optimal-call"
+elif flow_short == "PUTS" and score >= 65:
+    optimal_text = f"PUTS BELOW {downside_targets[0] if downside_targets else danger_level}"
+    optimal_class = "optimal-put"
+else:
+    optimal_text = "WAIT FOR CONFIRMATION"
+    optimal_class = "optimal-wait"
+
+if flow_short == "CALLS":
+    summary_sentence = (
+        f"{search_ticker} has bullish flow alignment. "
+        f"Best continuation is above {upside_targets[0] if upside_targets else primary_magnet}; "
+        f"loss of {danger_level} weakens the setup."
+    )
+elif flow_short == "PUTS":
+    summary_sentence = (
+        f"{search_ticker} has bearish flow alignment. "
+        f"Best continuation is below {downside_targets[0] if downside_targets else danger_level}; "
+        f"reclaiming {primary_magnet} weakens the setup."
+    )
+else:
+    summary_sentence = (
+        f"{search_ticker} is mixed. "
+        f"Wait for acceptance above {primary_magnet} or below {danger_level}."
+    )
+
+summary_html = (
+    f"<div class='summary-panel'>"
+    f"<div class='summary-grid'>"
+    f"<div class='summary-item'><div class='summary-label'>BIAS</div>"
+    f"<div class='summary-value {flow_class}'>{bias_text}</div></div>"
+    f"<div class='summary-item'><div class='summary-label'>SWING</div>"
+    f"<div class='summary-value'>{swing_grade}</div></div>"
+    f"<div class='summary-item'><div class='summary-label'>DAY</div>"
+    f"<div class='summary-value'>{day_grade}</div></div>"
+    f"<div class='summary-item'><div class='summary-label'>CONF</div>"
+    f"<div class='summary-value'>{score}%</div></div>"
+    f"<div class='summary-item'><div class='summary-label'>RISK</div>"
+    f"<div class='summary-value {risk_class}'>{risk_text}</div></div>"
+    f"<div class='summary-item'><div class='summary-label'>FLOW</div>"
+    f"<div class='summary-value {flow_class}'>{flow_short}</div></div>"
+    f"</div>"
+    f"<div class='summary-note'>"
+    f"<b>Optimal:</b> <span class='{optimal_class}'>{optimal_text}</span><br>"
+    f"<b>DP Proxy:</b> <span class='dp-proxy'>{dp_primary}</span> / "
+    f"<span class='dp-proxy'>{dp_secondary}</span><br>"
+    f"<b>Read:</b> {summary_sentence}"
+    f"</div>"
+    f"</div>"
 )
-
-summary_html = f"""
-<div class='summary-panel'>
-    <div class='summary-grid'>
-        <div class='summary-item'>
-            <div class='summary-label'>BIAS</div>
-            <div class='summary-value {flow_class}'>{bias_text}</div>
-        </div>
-        <div class='summary-item'>
-            <div class='summary-label'>SWING</div>
-            <div class='summary-value'>{swing_grade}</div>
-        </div>
-        <div class='summary-item'>
-            <div class='summary-label'>DAY</div>
-            <div class='summary-value'>{day_grade}</div>
-        </div>
-        <div class='summary-item'>
-            <div class='summary-label'>CONF</div>
-            <div class='summary-value'>{score}%</div>
-        </div>
-        <div class='summary-item'>
-            <div class='summary-label'>RISK</div>
-            <div class='summary-value {risk_class}'>{risk_text}</div>
-        </div>
-        <div class='summary-item'>
-            <div class='summary-label'>FLOW</div>
-            <div class='summary-value {flow_class}'>{flow_short}</div>
-        </div>
-    </div>
-
-    <div class='summary-note'>
-        {summary_note}
-    </div>
-</div>
-"""
 
 st.markdown(summary_html, unsafe_allow_html=True)
