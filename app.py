@@ -58,7 +58,7 @@ st.markdown("""
     border-radius:10px;
     padding:7px 10px;
     margin-bottom:7px;
-    font-size:11px;
+    font-size:12px;
     font-weight:900;
     letter-spacing:.04em;
 }
@@ -73,25 +73,25 @@ st.markdown("""
 
 .compact-label {
     color:#7f8897;
-    font-size:8px;
+    font-size:9px;
     font-weight:800;
     letter-spacing:.08em;
 }
 
 .compact-value {
-    font-size:14px;
+    font-size:15px;
     font-weight:950;
     margin-top:2px;
 }
 
 .panel-title { font-size:16px; line-height:1.1; font-weight:950; margin-bottom:2px; }
-.price-red { color:#ff6673; font-size:13px; font-weight:900; }
-.price-green { color:#55ff99; font-size:13px; font-weight:900; }
-.live { color:#55ff99; font-size:9px; font-weight:900; }
+.price-red { color:#ff6673; font-size:14px; font-weight:900; }
+.price-green { color:#55ff99; font-size:14px; font-weight:900; }
+.live { color:#55ff99; font-size:10px; font-weight:900; }
 
-[data-testid="stTextInput"] label { font-size:9px; }
+[data-testid="stTextInput"] label { font-size:10px; }
 [data-testid="stTextInput"] input {
-    font-size:11px;
+    font-size:12px;
     min-height:34px;
     height:34px;
     border-radius:8px;
@@ -107,7 +107,7 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
     overflow:hidden;
     margin-top:6px;
     background:#0a0d12;
-    max-height:650px;
+    max-height:500px;
     overflow-y:auto;
 }
 
@@ -115,7 +115,7 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
     width:100%;
     border-collapse:collapse;
     table-layout:fixed;
-    font-size:9px;
+    font-size:10px;
 }
 
 .gex-table th {
@@ -125,13 +125,13 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
     background:#171b24;
     color:#8e97a6;
     text-align:left;
-    padding:5px 7px;
-    font-size:8px;
+    padding:4px 7px;
+    font-size:9px;
     letter-spacing:.06em;
 }
 
 .gex-table td {
-    padding:3px 7px;
+    padding:2px 7px;
     border-top:1px solid rgba(255,255,255,.06);
     font-weight:800;
 }
@@ -155,7 +155,7 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
     border-radius:8px;
     padding:6px 7px;
     margin-top:6px;
-    font-size:9px;
+    font-size:10px;
     line-height:1.3;
 }
 
@@ -166,7 +166,7 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
 }
 
 .path-title {
-    font-size:9px;
+    font-size:10px;
     font-weight:950;
     margin-bottom:2px;
 }
@@ -190,13 +190,13 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
 
 .decision-label {
     color:#7f8897;
-    font-size:7px;
+    font-size:8px;
     font-weight:800;
     letter-spacing:.08em;
 }
 
 .decision-value {
-    font-size:11px;
+    font-size:12px;
     font-weight:950;
     margin-top:2px;
 }
@@ -241,13 +241,13 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
 
 .summary-label {
     color:#7f8897;
-    font-size:7px;
+    font-size:8px;
     font-weight:800;
     letter-spacing:.07em;
 }
 
 .summary-value {
-    font-size:11px;
+    font-size:12px;
     font-weight:950;
     margin-top:2px;
 }
@@ -255,7 +255,7 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
 .summary-note {
     margin-top:7px;
     color:#9aa3b1;
-    font-size:8px;
+    font-size:9px;
     line-height:1.35;
 }
 
@@ -267,7 +267,7 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
 .summary-note {
     margin-top:7px;
     color:#aab2bf;
-    font-size:8px;
+    font-size:9px;
     line-height:1.45;
     background:#080b10;
     border:1px solid #252c38;
@@ -283,6 +283,101 @@ hr { margin:.55rem 0 !important; border-color:#1e2430 !important; }
 .optimal-put { color:#ff6673; font-weight:900; }
 .optimal-wait { color:#f1d84b; font-weight:900; }
 .dp-proxy { color:#d16cff; font-weight:900; }
+
+
+.summary-details {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+    margin-top:7px;
+}
+
+.detail-item {
+    background:#080b10;
+    border:1px solid #252c38;
+    border-radius:8px;
+    padding:7px 6px;
+}
+
+.detail-label {
+    color:#7f8897;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.06em;
+}
+
+.detail-value {
+    margin-top:2px;
+    font-size:11px;
+    font-weight:900;
+}
+
+@media (max-width:900px) {
+    .summary-details { grid-template-columns:repeat(2,1fr); }
+}
+
+
+.ai-read {
+    margin-top:7px;
+    background:#080b10;
+    border:1px solid #252c38;
+    border-radius:8px;
+    padding:8px 9px;
+}
+
+.ai-read-title {
+    font-size:9px;
+    font-weight:950;
+    letter-spacing:.08em;
+    color:#f4f6f8;
+    margin-bottom:5px;
+}
+
+.ai-line {
+    font-size:9px;
+    line-height:1.45;
+    color:#aab2bf;
+    margin:2px 0;
+}
+
+.trade-card {
+    margin-top:7px;
+    background:#0a0d12;
+    border:1px solid #2a3140;
+    border-radius:8px;
+    padding:8px 9px;
+}
+
+.trade-grid {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+}
+
+.trade-item {
+    background:#080b10;
+    border:1px solid #252c38;
+    border-radius:8px;
+    padding:7px 6px;
+    text-align:center;
+}
+
+.trade-label {
+    color:#7f8897;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.06em;
+}
+
+.trade-value {
+    margin-top:2px;
+    font-size:11px;
+    font-weight:950;
+}
+
+@media (max-width:900px) {
+    .trade-grid { grid-template-columns:repeat(2,1fr); }
+}
 
 </style>
 """, unsafe_allow_html=True)
@@ -692,6 +787,8 @@ downside_text = " → ".join([str(x) for x in downside_targets]) if downside_tar
 
 
 
+
+
 # ---------------- COMPACT SUMMARY PANEL ----------------
 
 flow_short = (
@@ -707,24 +804,26 @@ flow_class = (
 )
 
 score = 50
+px = None
+magnet_px = None
+danger_px = None
 
-if selected_price not in (None, "NO DATA"):
-    try:
-        px = float(selected_price)
-        magnet_px = float(primary_magnet)
-        danger_px = float(danger_level)
+try:
+    px = float(selected_price)
+    magnet_px = float(primary_magnet)
+    danger_px = float(danger_level)
 
-        if flow_short == "CALLS" and px >= magnet_px:
-            score += 25
-        elif flow_short == "PUTS" and px <= danger_px:
-            score += 25
-        elif flow_short in ("CALLS", "PUTS"):
-            score += 12
+    if flow_short == "CALLS" and px >= magnet_px:
+        score += 25
+    elif flow_short == "PUTS" and px <= danger_px:
+        score += 25
+    elif flow_short in ("CALLS", "PUTS"):
+        score += 12
 
-        if abs(px - magnet_px) <= max(1, abs(px) * 0.003):
-            score += 8
-    except Exception:
-        pass
+    if abs(px - magnet_px) <= max(1, abs(px) * 0.003):
+        score += 8
+except Exception:
+    pass
 
 score = min(score, 92)
 
@@ -760,38 +859,108 @@ bias_text = (
     else "NEUTRAL"
 )
 
-# Until a real dark-pool endpoint is connected, use the strongest dealer levels
-# as clearly labeled dark-pool proxies rather than pretending they are real prints.
+positive_total = 0.0
+negative_total = 0.0
+
+for _, gex in selected_rows:
+    try:
+        value = clean_gex_value(gex)
+        if value >= 0:
+            positive_total += value
+        else:
+            negative_total += abs(value)
+    except Exception:
+        continue
+
+if positive_total > negative_total * 1.35:
+    gamma_regime = "STABLE"
+    regime_class = "green"
+elif negative_total > positive_total * 1.35:
+    gamma_regime = "EXPANSIVE"
+    regime_class = "purple"
+else:
+    gamma_regime = "MIXED"
+    regime_class = "yellow"
+
+location_text = "N/A"
+magnet_distance = "N/A"
+accelerator_distance = "N/A"
+nearest_trigger = "N/A"
+room_text = "N/A"
+
+try:
+    magnet_distance_val = round(abs(px - magnet_px), 2)
+    accelerator_distance_val = round(abs(px - danger_px), 2)
+    magnet_distance = str(magnet_distance_val)
+    accelerator_distance = str(accelerator_distance_val)
+
+    if px > magnet_px:
+        location_text = "ABOVE ★"
+    elif px < danger_px:
+        location_text = "BELOW ⚡"
+    else:
+        location_text = "BETWEEN"
+
+    trigger_candidates = []
+    if upside_targets:
+        trigger_candidates.append(("▲", float(upside_targets[0])))
+    if downside_targets:
+        trigger_candidates.append(("▼", float(downside_targets[0])))
+
+    if trigger_candidates:
+        mark, level = min(trigger_candidates, key=lambda item: abs(px - item[1]))
+        nearest_trigger = f"{mark} {level}"
+        room_text = str(round(abs(px - level), 2))
+except Exception:
+    pass
+
 dp_primary = primary_magnet
 dp_secondary = danger_level
 
+bull_entry = upside_targets[0] if upside_targets else primary_magnet
+bear_entry = downside_targets[0] if downside_targets else danger_level
+bull_target = upside_targets[-1] if upside_targets else primary_magnet
+bear_target = downside_targets[-1] if downside_targets else danger_level
+
 if flow_short == "CALLS" and score >= 65:
-    optimal_text = f"CALLS ABOVE {upside_targets[0] if upside_targets else primary_magnet}"
-    optimal_class = "optimal-call"
+    best_side = "CALLS"
+    entry_level = bull_entry
+    invalidation_level = bear_entry
+    target_level = bull_target
+    trade_class = "green"
 elif flow_short == "PUTS" and score >= 65:
-    optimal_text = f"PUTS BELOW {downside_targets[0] if downside_targets else danger_level}"
-    optimal_class = "optimal-put"
+    best_side = "PUTS"
+    entry_level = bear_entry
+    invalidation_level = bull_entry
+    target_level = bear_target
+    trade_class = "red"
 else:
-    optimal_text = "WAIT FOR CONFIRMATION"
-    optimal_class = "optimal-wait"
+    best_side = "WAIT"
+    entry_level = f"{bear_entry} / {bull_entry}"
+    invalidation_level = "N/A"
+    target_level = "CONFIRM"
+    trade_class = "yellow"
+
+ai_lines = []
 
 if flow_short == "CALLS":
-    summary_sentence = (
-        f"{search_ticker} has bullish flow alignment. "
-        f"Best continuation is above {upside_targets[0] if upside_targets else primary_magnet}; "
-        f"loss of {danger_level} weakens the setup."
-    )
+    ai_lines.append(f"• Call flow is leading, giving buyers the cleaner edge.")
 elif flow_short == "PUTS":
-    summary_sentence = (
-        f"{search_ticker} has bearish flow alignment. "
-        f"Best continuation is below {downside_targets[0] if downside_targets else danger_level}; "
-        f"reclaiming {primary_magnet} weakens the setup."
-    )
+    ai_lines.append(f"• Put flow is leading, giving sellers the cleaner edge.")
 else:
-    summary_sentence = (
-        f"{search_ticker} is mixed. "
-        f"Wait for acceptance above {primary_magnet} or below {danger_level}."
-    )
+    ai_lines.append(f"• Flow is mixed, so confirmation matters more than prediction.")
+
+ai_lines.append(f"• Gamma regime is {gamma_regime.lower()}, which implies "
+                f"{'slower rotation' if gamma_regime == 'STABLE' else 'faster expansion' if gamma_regime == 'EXPANSIVE' else 'two-way trade'}.")
+
+ai_lines.append(f"• Price is {location_text.lower()}, {magnet_distance} from the magnet and "
+                f"{accelerator_distance} from the accelerator.")
+
+ai_lines.append(f"• Above {bull_entry} opens the upside path toward {upside_text}.")
+ai_lines.append(f"• Below {bear_entry} opens the downside path toward {downside_text}.")
+ai_lines.append(f"• DP proxy zones remain {dp_primary} and {dp_secondary} until real dark-pool data is connected.")
+
+ai_html = "".join(f"<div class='ai-line'>{line}</div>" for line in ai_lines)
 
 summary_html = (
     f"<div class='summary-panel'>"
@@ -809,11 +978,42 @@ summary_html = (
     f"<div class='summary-item'><div class='summary-label'>FLOW</div>"
     f"<div class='summary-value {flow_class}'>{flow_short}</div></div>"
     f"</div>"
-    f"<div class='summary-note'>"
-    f"<b>Optimal:</b> <span class='{optimal_class}'>{optimal_text}</span><br>"
-    f"<b>DP Proxy:</b> <span class='dp-proxy'>{dp_primary}</span> / "
-    f"<span class='dp-proxy'>{dp_secondary}</span><br>"
-    f"<b>Read:</b> {summary_sentence}"
+
+    f"<div class='summary-details'>"
+    f"<div class='detail-item'><div class='detail-label'>REGIME</div>"
+    f"<div class='detail-value {regime_class}'>{gamma_regime}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>LOCATION</div>"
+    f"<div class='detail-value'>{location_text}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>NEAREST</div>"
+    f"<div class='detail-value'>{nearest_trigger}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>ROOM</div>"
+    f"<div class='detail-value'>{room_text}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>DIST ★</div>"
+    f"<div class='detail-value yellow'>{magnet_distance}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>DIST ⚡</div>"
+    f"<div class='detail-value purple'>{accelerator_distance}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>DP PROXY 1</div>"
+    f"<div class='detail-value purple'>{dp_primary}</div></div>"
+    f"<div class='detail-item'><div class='detail-label'>DP PROXY 2</div>"
+    f"<div class='detail-value purple'>{dp_secondary}</div></div>"
+    f"</div>"
+
+    f"<div class='ai-read'>"
+    f"<div class='ai-read-title'>7C TRADE READ</div>"
+    f"{ai_html}"
+    f"</div>"
+
+    f"<div class='trade-card'>"
+    f"<div class='trade-grid'>"
+    f"<div class='trade-item'><div class='trade-label'>BEST</div>"
+    f"<div class='trade-value {trade_class}'>{best_side}</div></div>"
+    f"<div class='trade-item'><div class='trade-label'>ENTRY</div>"
+    f"<div class='trade-value'>{entry_level}</div></div>"
+    f"<div class='trade-item'><div class='trade-label'>INVALID</div>"
+    f"<div class='trade-value'>{invalidation_level}</div></div>"
+    f"<div class='trade-item'><div class='trade-label'>TARGET</div>"
+    f"<div class='trade-value'>{target_level}</div></div>"
+    f"</div>"
     f"</div>"
     f"</div>"
 )
