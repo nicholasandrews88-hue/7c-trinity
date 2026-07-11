@@ -349,7 +349,7 @@ def panel(symbol, price, change, rows):
 
         return ["background-color:#111;color:#aaa"] * len(row)
 
-    styled_df = df.style.apply(row_style, axis=1)
+styled_df = df.style.apply(row_style, axis=1)
 
 st.dataframe(
     styled_df,
@@ -357,24 +357,25 @@ st.dataframe(
     hide_index=True,
     height=680
 )
-    paths = build_paths(rows, price)
 
-    if paths:
-        bull_trigger, bear_trigger, upside, downside, largest_negative, largest_positive = paths
+paths = build_paths(rows, price)
 
-        st.markdown("### 🎯 Most Likely Paths")
+if paths:
+    bull_trigger, bear_trigger, upside, downside, largest_negative, largest_positive = paths
 
-        col1, col2 = st.columns(2)
+    st.markdown("### 🎯 Most Likely Paths")
 
-        with col1:
-            st.markdown("#### 🟢 Bullish Path")
-            st.write(f"**Trigger:** Reclaim / hold {bull_trigger}")
-            st.write("**Targets:** " + " → ".join([str(x) for x in upside]))
+    col1, col2 = st.columns(2)
 
-        with col2:
-            st.markdown("#### 🔴 Bearish Path")
-            st.write(f"**Trigger:** Lose {bear_trigger}")
-            st.write("**Targets:** " + " → ".join([str(x) for x in downside]))
+    with col1:
+        st.markdown("#### 🟢 Bullish Path")
+        st.write(f"**Trigger:** Reclaim / hold {bull_trigger}")
+        st.write("**Targets:** " + " → ".join([str(x) for x in upside]))
+
+    with col2:
+        st.markdown("#### 🔴 Bearish Path")
+        st.write(f"**Trigger:** Lose {bear_trigger}")
+        st.write("**Targets:** " + " → ".join([str(x) for x in downside]))
 
         st.markdown("#### ⚡ Key Levels")
         st.write(f"**Accelerator:** {largest_negative[0]} ({largest_negative[1]:,.0f})")
