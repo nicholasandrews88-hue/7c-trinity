@@ -49,56 +49,93 @@ headers = {
 st.markdown("""
 <style>
 .stApp { background-color:#050607; color:white; }
-.block-container { padding-top:0.7rem; max-width:1900px; }
+.block-container {
+    padding-top:0.45rem;
+    padding-bottom:1.2rem;
+    max-width:1800px;
+}
+
+/* tighter spacing */
+[data-testid="stVerticalBlock"] { gap:0.55rem; }
+[data-testid="stHorizontalBlock"] { gap:0.75rem; }
+hr { margin:0.65rem 0 0.9rem 0; }
 
 .topbar {
-    background:#0b0e14;
+    background:#0a0d12;
     border:1px solid #252b38;
-    border-radius:14px;
-    padding:10px 14px;
-    margin-bottom:10px;
+    border-radius:12px;
+    padding:8px 12px;
+    margin-bottom:6px;
     font-weight:800;
-    font-size:14px;
+    font-size:12px;
+    letter-spacing:0.2px;
 }
 
-.panel-title { font-size:22px; font-weight:900; }
-.price-red { color:#ff4d4d; font-size:18px; font-weight:900; }
-.price-green { color:#55ff99; font-size:18px; font-weight:900; }
-.live { color:#55ff99; font-weight:900; }
+.panel-title {
+    font-size:17px;
+    line-height:1.05;
+    font-weight:900;
+    margin-bottom:2px;
+}
+.price-red { color:#ff5c5c; font-size:14px; font-weight:900; }
+.price-green { color:#55ff99; font-size:14px; font-weight:900; }
+.live { color:#55ff99; font-size:12px; font-weight:900; }
 
+/* compact input */
+[data-testid="stTextInput"] label { font-size:11px; }
+[data-testid="stTextInput"] input {
+    font-size:12px;
+    min-height:38px;
+    padding:7px 10px;
+}
+
+/* smaller metrics */
+[data-testid="stMetricLabel"] { font-size:10px; }
+[data-testid="stMetricValue"] { font-size:19px; }
+[data-testid="stMetricDelta"] { font-size:9px; }
+[data-testid="stMetric"] { padding:0.1rem 0; }
+
+/* smaller dataframe text */
+[data-testid="stDataFrame"] { font-size:11px; }
+[data-testid="stDataFrame"] [role="columnheader"] { font-size:10px; }
+[data-testid="stDataFrame"] [role="gridcell"] { font-size:11px; }
+
+/* cleaner readout cards */
+.green-box, .red-box, .yellow-box {
+    padding:9px 11px;
+    border-radius:9px;
+    font-size:11px;
+    line-height:1.55;
+    font-weight:700;
+}
 .green-box {
-    background:linear-gradient(90deg,#062b16,#06361d);
-    border:1px solid #00ff66;
-    color:#55ff99;
-    padding:10px 12px;
-    border-radius:10px;
-    font-size:13px;
-    font-weight:800;
+    background:linear-gradient(90deg,#062713,#07331a);
+    border:1px solid #14c95c;
+    color:#69f69f;
 }
-
 .red-box {
-    background:linear-gradient(90deg,#3a0505,#160000);
-    border:1px solid #ff4d4d;
-    color:#ff6b6b;
-    padding:10px 12px;
-    border-radius:10px;
-    font-size:13px;
-    font-weight:800;
+    background:linear-gradient(90deg,#310606,#180202);
+    border:1px solid #ef4f4f;
+    color:#ff7777;
 }
-
 .yellow-box {
-    background:linear-gradient(90deg,#302800,#181300);
-    border:1px solid #ffde59;
-    color:#ffde59;
-    padding:10px 12px;
-    border-radius:10px;
-    font-size:13px;
-    font-weight:800;
+    background:linear-gradient(90deg,#2a2300,#161200);
+    border:1px solid #e4c83f;
+    color:#f3dc68;
 }
 
-[data-testid="stMetricLabel"] { font-size:11px; }
-[data-testid="stMetricValue"] { font-size:24px; }
-[data-testid="stMetricDelta"] { font-size:10px; }
+h1 { font-size:1.5rem !important; }
+h2 { font-size:1.2rem !important; }
+h3 { font-size:1rem !important; }
+h4 { font-size:0.88rem !important; }
+p, li, .stMarkdown { font-size:12px; }
+
+@media (max-width: 900px) {
+    .block-container { padding-left:0.7rem; padding-right:0.7rem; }
+    [data-testid="stHorizontalBlock"] { flex-wrap:wrap; }
+    [data-testid="column"] { min-width:100% !important; width:100% !important; }
+    .panel-title { margin-top:8px; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -353,7 +390,7 @@ def panel(symbol, price, change, rows):
         styled_df,
         width="stretch",
         hide_index=True,
-        height=680
+        height=560
     )
 
     paths = build_paths(rows, price)
