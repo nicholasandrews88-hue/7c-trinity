@@ -349,13 +349,14 @@ def panel(symbol, price, change, rows):
 
         return ["background-color:#111;color:#aaa"] * len(row)
 
-    st.dataframe(
-        df.style.apply(row_style, axis=1),
-        use_container_width=True,
-        hide_index=True,
-        height=680
-    )
+    styled_df = df.style.apply(row_style, axis=1)
 
+st.dataframe(
+    styled_df,
+    width="stretch",
+    hide_index=True,
+    height=680
+)
     paths = build_paths(rows, price)
 
     if paths:
