@@ -598,9 +598,8 @@ hr {
 
 .intelligence-flow-grid {
     display:grid;
-    grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);
+    grid-template-columns:1.35fr .75fr .70fr;
     gap:8px;
-    margin-top:8px;
 }
 
 .aggressive-flow {
